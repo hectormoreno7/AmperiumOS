@@ -1,0 +1,76 @@
+.card {
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.cardHeader {
+  margin-bottom: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: var(--color-gold-soft);
+  color: var(--color-gold-dark);
+  display: grid;
+  place-items: center;
+  font-size: 21px;
+}
+
+.trend {
+  padding: 5px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.trendpositive {
+  background: #eaf8ef;
+  color: #18733a;
+}
+
+.trendnegative {
+  background: #fff0f0;
+  color: #b02f2f;
+}
+
+.trendneutral {
+  background: #f0f2f5;
+  color: #59616c;
+}
+
+.value {
+  color: var(--color-text-primary);
+  display: block;
+  font-size: 30px;
+  letter-spacing: -0.04em;
+}
+
+.card h3 {
+  margin: 5px 0 0;
+  color: var(--color-text-primary);
+  font-size: 14px;
+}
+
+.card p {
+  margin: 8px 0 0;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  line-height: 1.45;
+}

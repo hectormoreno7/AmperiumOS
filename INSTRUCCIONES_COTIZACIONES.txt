@@ -1,0 +1,20 @@
+AMPERIUM OS v0.2.1 - COTIZACIONES (FASE 1)
+
+1. Coloca este ZIP dentro de la carpeta raíz amperiumos.
+2. Ejecuta desde CMD dentro de amperiumos:
+
+powershell -NoProfile -Command "Expand-Archive -Path '.\AmperiumOS_v0.2.1_Cotizaciones_Fase1.zip' -DestinationPath '.' -Force"
+
+3. Ejecuta:
+
+npm install
+npm run dev
+
+Esta fase incluye:
+- Listado y búsqueda de cotizaciones.
+- Crear y editar borradores.
+- Selección de clientes existentes.
+- Conceptos, subtotal, IVA y total.
+- Guardado y eliminación en Firestore.
+
+El folio se generará en la siguiente fase al finalizar la cotización.

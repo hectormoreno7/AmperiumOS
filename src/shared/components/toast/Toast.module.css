@@ -1,0 +1,151 @@
+.toast {
+  position: fixed;
+  z-index: 3000;
+  top: 22px;
+  right: 22px;
+  width: min(390px, calc(100vw - 32px));
+  min-height: 82px;
+  padding: 16px 46px 16px 16px;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  align-items: center;
+  gap: 13px;
+  overflow: hidden;
+  border: 1px solid rgba(212, 160, 23, 0.27);
+  border-radius: 16px;
+  background: rgba(22, 24, 28, 0.97);
+  box-shadow:
+    0 22px 48px rgba(10, 12, 15, 0.28),
+    inset 0 1px rgba(255, 255, 255, 0.07);
+  color: #ffffff;
+  backdrop-filter: blur(16px);
+  animation: toastEnter 240ms ease-out;
+}
+
+.icon {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: rgba(212, 160, 23, 0.14);
+  color: #f0c24a;
+  font-size: 1.15rem;
+  font-weight: 950;
+}
+
+.content {
+  min-width: 0;
+}
+
+.content strong {
+  display: block;
+  color: #ffffff;
+  font-size: 0.94rem;
+  font-weight: 850;
+  line-height: 1.3;
+}
+
+.content p {
+  margin: 4px 0 0;
+  color: rgba(255, 255, 255, 0.64);
+  font-size: 0.82rem;
+  font-weight: 550;
+  line-height: 1.45;
+}
+
+.closeButton {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.54);
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition:
+    background 150ms ease,
+    color 150ms ease;
+}
+
+.closeButton:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.progress {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  transform-origin: left;
+  background: #d4a017;
+  animation-name: progress;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+.error {
+  border-color: rgba(207, 58, 58, 0.3);
+}
+
+.error .icon {
+  background: rgba(207, 58, 58, 0.14);
+  color: #ff7a7a;
+}
+
+.error .progress {
+  background: #cf3a3a;
+}
+
+.warning .icon,
+.reminder .icon {
+  background: rgba(212, 160, 23, 0.15);
+  color: #f2c94c;
+}
+
+.info .icon {
+  background: rgba(74, 144, 226, 0.15);
+  color: #77b6ff;
+}
+
+.info .progress {
+  background: #4a90e2;
+}
+
+@keyframes toastEnter {
+  from {
+    opacity: 0;
+    transform: translateY(-12px) translateX(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) translateX(0);
+  }
+}
+
+@keyframes progress {
+  from {
+    transform: scaleX(1);
+  }
+
+  to {
+    transform: scaleX(0);
+  }
+}
+
+@media (max-width: 600px) {
+  .toast {
+    top: 14px;
+    right: 16px;
+    left: 16px;
+    width: auto;
+  }
+}

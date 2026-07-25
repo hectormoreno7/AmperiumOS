@@ -1,0 +1,52 @@
+Listado de rutas de carpetas
+El número de serie del volumen es 0468-0D83
+C:\USERS\HECTO\SISTEMA OPERATIVO\AMPERIUMOS\SRC
+¦   App.jsx
+¦   index.css
+¦   main.jsx
+¦   
++---app
+¦       App.jsx
+¦       AppRoutes.jsx
+¦       
++---assets
+¦   ¦   hero.png
+¦   ¦   vite.svg
+¦   ¦   
+¦   +---branding
+¦       +---icons
+¦       +---logos
+¦               isotipo-negro.png
+¦               isotipo-negro.svg
+¦               isotipo.png
+¦               isotipo.svg
+¦               logo-horizontal-negro.png
+¦               logo-horizontal-negro.svg
+¦               logo-horizontal-simple-negro.png
+¦               logo-horizontal-simple-negro.svg
+¦               logo-horizontal-simple.png
+¦               logo-horizontal-simple.svg
+¦               logo-horizontal.png
+¦               logo-horizontal.svg
+¦               
++---layouts
+¦   +---AppLayout
+¦           AppLayout.jsx
+¦           AppLayout.module.css
+¦           
++---modules
+¦   +---dashboard
+¦       +---pages
+¦               DashboardPage.jsx
+¦               DashboardPage.module.css
+¦               
++---shared
+¦   +---config
+¦   +---constants
+¦           branding.js
+¦           
++---styles
+        globals.css
+        reset.css
+        tokens.css
+        

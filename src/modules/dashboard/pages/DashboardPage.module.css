@@ -1,0 +1,340 @@
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.welcomeSection {
+  position: relative;
+  min-height: 132px;
+  padding: 23px 28px;
+  border-radius: 20px;
+  overflow: hidden;
+  background:
+    radial-gradient(
+      circle at 82% 10%,
+      rgba(212, 160, 23, 0.26),
+      transparent 34%
+    ),
+    linear-gradient(135deg, #202020 0%, #070707 100%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+  box-shadow: 0 11px 30px rgba(0, 0, 0, 0.12);
+}
+
+.welcomeSection::after {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  right: -45px;
+  bottom: -105px;
+  width: 230px;
+  height: 230px;
+  border: 1px solid rgba(212, 160, 23, 0.18);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.welcomeContent {
+  position: relative;
+  z-index: 2;
+}
+
+.date {
+  display: inline-flex;
+  align-items: center;
+  min-height: 25px;
+  padding: 0 10px;
+  border: 1px solid rgba(212, 160, 23, 0.28);
+  border-radius: 999px;
+  background: rgba(212, 160, 23, 0.1);
+  color: #d4a017;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.welcomeSection h2 {
+  margin: 9px 0 5px;
+  color: #ffffff;
+  font-size: clamp(24px, 3vw, 32px);
+  letter-spacing: -0.035em;
+}
+
+.welcomeSection p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 13px;
+}
+
+.welcomeSection p strong {
+  color: #ffffff;
+}
+
+.welcomeBrand {
+  position: relative;
+  z-index: 2;
+  width: min(300px, 34%);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.welcomeBrand {
+  position: relative;
+  z-index: 2;
+  min-width: 270px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.welcomeBrand img {
+  width: 285px;
+  max-width: 100%;
+  max-height: 105px;
+  display: block;
+  object-fit: contain;
+  object-position: right center;
+  opacity: 0.82;
+  filter:
+    brightness(1.08)
+    contrast(1.05);
+}
+
+@media (max-width: 760px) {
+  .welcomeBrand {
+    width: 100%;
+    min-width: 0;
+    justify-content: flex-start;
+  }
+
+  .welcomeBrand img {
+    width: 230px;
+    max-height: 82px;
+    object-position: left center;
+  }
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.dashboardGrid {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1.1fr)
+    minmax(340px, 0.9fr);
+  gap: 18px;
+}
+
+.panel,
+.activityPanel {
+  padding: 21px;
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.panelHeader {
+  margin-bottom: 18px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.panelHeader h3 {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: 16px;
+}
+
+.panelHeader p {
+  margin: 5px 0 0;
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+
+.panelHeader > a {
+  color: var(--color-gold-dark);
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.quickActions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 11px;
+}
+
+.quickAction {
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  color: inherit;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  text-decoration: none;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    transform 160ms ease;
+}
+
+.quickAction:hover {
+  border-color: rgba(212, 160, 23, 0.4);
+  background: var(--color-gold-soft);
+  transform: translateY(-1px);
+}
+
+.quickActionIcon {
+  width: 37px;
+  height: 37px;
+  min-width: 37px;
+  border-radius: 11px;
+  background: var(--color-gold-soft);
+  color: var(--color-gold-dark);
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+}
+
+.quickAction div {
+  min-width: 0;
+  flex: 1;
+}
+
+.quickAction strong {
+  color: var(--color-text-primary);
+  display: block;
+  font-size: 13px;
+}
+
+.quickAction p {
+  margin: 4px 0 0;
+  color: var(--color-text-muted);
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.quickActionArrow {
+  color: var(--color-text-muted);
+  font-size: 21px;
+}
+
+.emptyState {
+  min-height: 205px;
+  padding: 26px 20px;
+  border-radius: 15px;
+  background: var(--color-background);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.emptyStateIcon {
+  width: 46px;
+  height: 46px;
+  margin-bottom: 13px;
+  border-radius: 14px;
+  background: var(--color-gold-soft);
+  color: var(--color-gold-dark);
+  display: grid;
+  place-items: center;
+  font-size: 21px;
+}
+
+.emptyState strong {
+  color: var(--color-text-primary);
+  font-size: 13px;
+}
+
+.emptyState p {
+  max-width: 320px;
+  margin: 7px 0 14px;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.emptyState a {
+  color: var(--color-gold-dark);
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.activityEmpty {
+  min-height: 90px;
+  border-radius: 14px;
+  background: var(--color-background);
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.activityEmpty span {
+  color: var(--color-gold);
+  font-size: 22px;
+}
+
+.activityEmpty p {
+  margin: 0;
+  font-size: 13px;
+}
+
+@media (max-width: 1200px) {
+  .statsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dashboardGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 680px) {
+  .dashboard {
+    gap: 18px;
+  }
+
+  .welcomeSection {
+    min-height: 135px;
+    padding: 21px 19px;
+  }
+
+  .welcomeSection h2 {
+    font-size: 24px;
+  }
+
+  .welcomeSection p {
+    font-size: 12px;
+  }
+
+  .welcomeBrand {
+    display: none;
+  }
+
+  .statsGrid,
+  .quickActions {
+    grid-template-columns: 1fr;
+  }
+
+  .panel,
+  .activityPanel {
+    padding: 17px;
+  }
+}

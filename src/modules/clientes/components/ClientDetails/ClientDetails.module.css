@@ -1,0 +1,144 @@
+.details {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+}
+
+.historySection {
+    overflow: hidden;
+    background: #ffffff;
+    border: 1px solid #e0e2e6;
+    border-radius: 13px;
+}
+
+.historyHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 17px 18px;
+    border-bottom: 1px solid #eceef1;
+}
+
+.historyHeader h3 {
+    margin: 0;
+    color: #24272c;
+    font-size: 0.9rem;
+    font-weight: 650;
+}
+
+.historyHeader p {
+    margin: 3px 0 0;
+    color: #8a8f97;
+    font-size: 0.72rem;
+}
+
+.historyHeader > span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 27px;
+    height: 27px;
+    padding: 0 8px;
+    border: 1px solid rgba(212, 160, 23, 0.38);
+    border-radius: 8px;
+    background: rgba(212, 160, 23, 0.08);
+    color: #9d7610;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.historyList {
+    display: flex;
+    flex-direction: column;
+}
+
+.historyItem {
+    display: grid;
+    grid-template-columns: 38px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 13px 16px;
+    border: 0;
+    border-bottom: 1px solid #f0f1f3;
+    background: #ffffff;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.18s ease;
+}
+
+.historyItem:last-child {
+    border-bottom: 0;
+}
+
+.historyItem:hover {
+    background: #fafafa;
+}
+
+.historyIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    background: #f1f2f4;
+    color: #676c74;
+}
+
+.historyContent {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.historyContent strong {
+    color: #292d32;
+    font-size: 0.78rem;
+}
+
+.historyContent span {
+    margin-top: 4px;
+    color: #7c8189;
+    font-size: 0.7rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.openText {
+    color: #a07916;
+    font-size: 0.68rem;
+    font-weight: 650;
+}
+
+.emptyHistory {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 88px;
+    padding: 18px;
+    color: #989ca3;
+}
+
+.emptyHistory strong {
+    display: block;
+    color: #656a72;
+    font-size: 0.77rem;
+}
+
+.emptyHistory p {
+    margin: 3px 0 0;
+    color: #989ca3;
+    font-size: 0.7rem;
+}

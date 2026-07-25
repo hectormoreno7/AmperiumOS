@@ -1,0 +1,8 @@
+AMPERIUM OS v0.2.5 - PDF basado en diseño de referencia
+
+1. Coloca este ZIP dentro de la carpeta amperiumos.
+2. Abre PowerShell en esa carpeta.
+3. Ejecuta:
+   Expand-Archive -Path ".\AmperiumOS_v0.2.5_PDF_Estilo_Referencia.zip" -DestinationPath "." -Force
+4. Ejecuta:
+   npm run dev

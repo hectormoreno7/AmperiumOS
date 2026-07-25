@@ -1,0 +1,15 @@
+AMPERIUM OS v0.2.3
+
+1. Coloca este ZIP dentro de la carpeta raíz amperiumos.
+2. Ejecuta el comando indicado en el chat.
+3. Ejecuta npm install.
+4. Ejecuta npm run dev.
+
+Cambios:
+- Encabezado claro y compacto.
+- Cálculo correcto para materiales/equipos con costo capturado con IVA.
+- IVA opcional para servicios.
+- Guardar borrador.
+- Finalizar, generar folio global y descargar PDF.
+- PDF con costos, anticipo, términos, firmas, imagen y pie de página.
+- Actualización del contador de cotizaciones del cliente.

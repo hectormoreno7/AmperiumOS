@@ -1,0 +1,23 @@
+.grid {
+    display: grid;
+    grid-template-columns: repeat(
+        auto-fill,
+        minmax(290px, 1fr)
+    );
+    gap: 12px;
+    width: 100%;
+}
+
+.empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 210px;
+    padding: 28px;
+    border: 1px dashed #d9dce1;
+    border-radius: 12px;
+    background: #ffffff;
+    color: #8b9098;
+    font-size: 0.86rem;
+    text-align: center;
+}

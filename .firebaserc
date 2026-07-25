@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "amperiumos"
+  },
+  "targets": {
+    "amperiumos": {
+      "hosting": {
+        "sistema": [
+          "amperiumos-sistema"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

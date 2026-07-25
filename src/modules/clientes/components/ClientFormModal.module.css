@@ -1,0 +1,525 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  padding: 18px;
+  background: rgba(7, 8, 10, 0.64);
+  backdrop-filter: blur(5px);
+  display: grid;
+  place-items: center;
+  overflow-y: auto;
+}
+
+.modal {
+  width: min(820px, calc(100vw - 36px));
+  max-height: calc(100dvh - 36px);
+  border: 1px solid #8f959e;
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow:
+    0 28px 75px rgba(0, 0, 0, 0.28);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.modalHeader {
+  flex-shrink: 0;
+  min-height: 122px;
+  padding: 20px 22px;
+  border-bottom: 1px solid #3d4147;
+  background:
+    linear-gradient(
+      135deg,
+      #26292e 0%,
+      #17191d 65%,
+      #101114 100%
+    );
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.brandArea {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.brandLogo {
+  width: 190px;
+  max-width: 36%;
+  max-height: 66px;
+  flex-shrink: 0;
+  object-fit: contain;
+  object-position: left center;
+}
+
+.headerText {
+  min-width: 0;
+  padding-left: 20px;
+  border-left: 1px solid
+    rgba(255, 255, 255, 0.18);
+}
+
+.headerText > span {
+  color: #e4b740;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.headerText h2 {
+  margin: 5px 0 5px;
+  color: #ffffff;
+  font-size: 25px;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.headerText p {
+  margin: 0;
+  color: #c5c9cf;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.closeButton {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  padding: 0;
+  border: 1px solid #626871;
+  border-radius: 11px;
+  background: #30343a;
+  color: #ffffff;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  font-size: 24px;
+  transition:
+    border-color 150ms ease,
+    background 150ms ease,
+    transform 150ms ease;
+}
+
+.closeButton:hover {
+  border-color: #d4a017;
+  background: #3a3e45;
+  color: #efc45c;
+}
+
+.closeButton:active {
+  transform: scale(0.95);
+}
+
+.form {
+  min-height: 0;
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.formGrid {
+  min-height: 0;
+  flex: 1;
+  padding: 24px 26px 30px;
+  background: #f1f2f4;
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.formGrid label {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.formGrid label > span,
+.phoneHeader span {
+  color: #292d32;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.formGrid label > span strong,
+.phoneHeader span strong {
+  margin-left: 4px;
+  color: #a72e2e;
+}
+
+.formGrid input,
+.formGrid select,
+.formGrid textarea,
+.phoneRow input {
+  width: 100%;
+  min-height: 49px;
+  padding: 11px 13px;
+  border: 1px solid #a5abb3;
+  border-radius: 11px;
+  background: #ffffff;
+  color: #15171a;
+  outline: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    background 150ms ease;
+}
+
+.formGrid input::placeholder,
+.formGrid textarea::placeholder {
+  color: #747a83;
+}
+
+.formGrid input:hover,
+.formGrid select:hover,
+.formGrid textarea:hover,
+.phoneRow input:hover {
+  border-color: #7c838c;
+}
+
+.formGrid input:focus,
+.formGrid select:focus,
+.formGrid textarea:focus,
+.phoneRow input:focus {
+  border-color: #a7790b;
+  background: #ffffff;
+  box-shadow:
+    0 0 0 3px rgba(212, 160, 23, 0.14);
+}
+
+.formGrid textarea {
+  min-height: 115px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.phoneSection {
+  padding: 17px;
+  border: 1px solid #b5bac1;
+  border-radius: 14px;
+  background: #e5e7ea;
+}
+
+.phoneHeader {
+  margin-bottom: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.phoneHeader > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.phoneHeader small {
+  margin-top: 4px;
+  color: #555b63;
+  font-size: 11px;
+}
+
+.phoneHeader button {
+  min-height: 41px;
+  padding: 0 13px;
+  border: 1px solid #d4a017;
+  border-radius: 10px;
+  background: #202327;
+  color: #ffffff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  font-weight: 800;
+  transition:
+    background 150ms ease,
+    color 150ms ease,
+    transform 150ms ease;
+}
+
+.phoneHeader button > span {
+  color: #efc45c;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.phoneHeader button:hover {
+  background: #30343a;
+  color: #efc45c;
+}
+
+.phoneHeader button:active {
+  transform: scale(0.97);
+}
+
+.phoneList {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.phoneRow {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.removePhoneButton {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  padding: 0;
+  border: 1px solid #a64545;
+  border-radius: 10px;
+  background: #5d2929;
+  color: #ffffff;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  transition:
+    background 150ms ease,
+    transform 150ms ease;
+}
+
+.removePhoneButton:hover {
+  background: #7a3030;
+}
+
+.removePhoneButton:active {
+  transform: scale(0.95);
+}
+
+.warning {
+  margin: 20px 26px 0;
+  padding: 13px 15px;
+  border: 1px solid #c99d2e;
+  border-radius: 11px;
+  background: #fff5d7;
+  display: flex;
+  flex-direction: column;
+}
+
+.warning strong {
+  color: #624800;
+  font-size: 12px;
+}
+
+.warning span {
+  margin-top: 4px;
+  color: #70591d;
+  font-size: 11px;
+}
+
+.error {
+  color: #a62d2d;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.formFooter {
+  position: relative;
+  z-index: 5;
+  min-height: 76px;
+  flex-shrink: 0;
+  padding:
+    14px
+    26px
+    max(14px, env(safe-area-inset-bottom));
+  border-top: 1px solid #adb3bb;
+  background: #e1e3e6;
+  box-shadow:
+    0 -5px 14px rgba(20, 24, 31, 0.08);
+  display: flex;
+  justify-content: flex-end;
+  gap: 11px;
+}
+
+.cancelButton,
+.saveButton {
+  min-width: 145px;
+  min-height: 47px;
+  padding: 0 17px;
+  border-radius: 11px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  transition:
+    border-color 150ms ease,
+    background 150ms ease,
+    color 150ms ease,
+    transform 150ms ease;
+}
+
+.cancelButton {
+  border: 1px solid #8f969f;
+  background: #ffffff;
+  color: #292d32;
+}
+
+.cancelButton:hover {
+  border-color: #51575f;
+  background: #f1f2f4;
+}
+
+.saveButton {
+  border: 2px solid #d4a017;
+  background: #202327;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.saveButton > span {
+  color: #efc45c;
+  font-size: 15px;
+}
+
+.saveButton:hover {
+  background: #30343a;
+  color: #efc45c;
+}
+
+.saveButton:active,
+.cancelButton:active {
+  transform: scale(0.97);
+}
+
+@media (max-width: 720px) {
+  .brandArea {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .brandLogo {
+    width: 170px;
+    max-width: calc(100% - 45px);
+    max-height: 52px;
+  }
+
+  .headerText {
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .modalHeader {
+    min-height: 165px;
+  }
+}
+
+@media (max-width: 640px) {
+  .overlay {
+    padding: 0;
+    align-items: end;
+  }
+
+  .modal {
+    width: 100%;
+    max-height: 100dvh;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .modalHeader {
+    min-height: 143px;
+    padding:
+      max(17px, env(safe-area-inset-top))
+      16px
+      16px;
+  }
+
+  .brandArea {
+    gap: 9px;
+  }
+
+  .brandLogo {
+    width: 145px;
+    max-height: 43px;
+  }
+
+  .headerText > span {
+    font-size: 9px;
+  }
+
+  .headerText h2 {
+    font-size: 21px;
+  }
+
+  .headerText p {
+    font-size: 11px;
+  }
+
+  .formGrid {
+    padding: 19px 15px 28px;
+    grid-template-columns: 1fr;
+    gap: 17px;
+  }
+
+  .fullWidth {
+    grid-column: auto;
+  }
+
+  .formGrid label > span,
+  .phoneHeader span {
+    font-size: 13px;
+  }
+
+  .formGrid input,
+  .formGrid select,
+  .formGrid textarea,
+  .phoneRow input {
+    min-height: 50px;
+    font-size: 16px;
+  }
+
+  .phoneHeader {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .phoneHeader button {
+    width: 100%;
+    min-height: 45px;
+    justify-content: center;
+  }
+
+  .formFooter {
+    position: sticky;
+    bottom: 0;
+    min-height: 79px;
+    padding:
+      13px
+      15px
+      max(13px, env(safe-area-inset-bottom));
+  }
+
+  .cancelButton,
+  .saveButton {
+    min-width: 0;
+    min-height: 50px;
+    flex: 1;
+    padding: 0 10px;
+    font-size: 12px;
+  }
+}

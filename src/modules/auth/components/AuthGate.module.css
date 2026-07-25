@@ -1,0 +1,64 @@
+.loadingPage {
+  min-height: 100vh;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 12px;
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(212, 160, 23, 0.11),
+      transparent 32%
+    ),
+    #eef0f3;
+  color: #17191d;
+}
+
+.loadingMark {
+  width: 68px;
+  height: 68px;
+  margin-bottom: 8px;
+  padding: 9px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(212, 160, 23, 0.42);
+  border-radius: 20px;
+  background: #17191d;
+  box-shadow:
+    0 15px 30px rgba(17, 19, 23, 0.2);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+.loadingMark img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.loadingLogo {
+  width: min(240px, 72vw);
+  max-height: 65px;
+  object-fit: contain;
+}
+
+.loadingPage p {
+  margin: 2px 0 0;
+  color: #747982;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.authenticatedApp {
+  min-height: 100vh;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.05);
+  }
+}
