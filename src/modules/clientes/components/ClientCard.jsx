@@ -11,7 +11,13 @@ function getClientName(client) {
 }
 
 function getClientPhone(client) {
-    return client?.phone || client?.telefono || "";
+    return (
+        client?.phones?.find(Boolean) ||
+        client?.telefonos?.find(Boolean) ||
+        client?.phone ||
+        client?.telefono ||
+        ""
+    );
 }
 
 function getClientAddress(client) {
@@ -60,7 +66,7 @@ export default function ClientCard({
             return;
         }
 
-        window.location.href = `tel:${phone}`;
+        window.location.href = `tel:${phone.replace(/[^\d+]/g, "")}`;
     };
 
     const openMaps = (event) => {

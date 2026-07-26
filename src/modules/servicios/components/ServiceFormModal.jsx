@@ -3,6 +3,8 @@ import {
   useState,
 } from 'react'
 
+import branding from '../../../shared/constants/branding'
+import useCompanyConfiguration from '../../configuracion/hooks/useCompanyConfiguration'
 import styles from './ServiceFormModal.module.css'
 
 const createImageId = () => {
@@ -46,6 +48,10 @@ const INITIAL_FORM = {
   internalNotes: '',
 
   images: [],
+  expenses: [],
+  quotedTotal: 0,
+  paidAmount: 0,
+  extraTaxEnabled: false,
 }
 
 const compressImage = (
@@ -138,6 +144,8 @@ function ServiceFormModal({
   onClose,
   onSave,
 }) {
+  const companyConfiguration =
+    useCompanyConfiguration()
   const [form, setForm] =
     useState(INITIAL_FORM)
 
@@ -351,6 +359,57 @@ function ServiceFormModal({
     }))
   }
 
+  const addExpense = () => {
+    setForm((current) => ({
+      ...current,
+      expenses: [
+        ...(current.expenses || []),
+        {
+          id: createImageId(),
+          description: '',
+          amount: '',
+          date: new Date()
+            .toISOString()
+            .slice(0, 10),
+        },
+      ],
+    }))
+  }
+
+  const updateExpense = (
+    expenseId,
+    field,
+    value,
+  ) => {
+    setForm((current) => ({
+      ...current,
+      expenses: (
+        current.expenses || []
+      ).map((expense) =>
+        expense.id === expenseId
+          ? {
+              ...expense,
+              [field]: value,
+            }
+          : expense,
+      ),
+    }))
+  }
+
+  const removeExpense = (
+    expenseId,
+  ) => {
+    setForm((current) => ({
+      ...current,
+      expenses: (
+        current.expenses || []
+      ).filter(
+        (expense) =>
+          expense.id !== expenseId,
+      ),
+    }))
+  }
+
   const validate = () => {
     if (
       !form.clientName.trim()
@@ -393,9 +452,58 @@ function ServiceFormModal({
     }
 
     try {
+      const normalizedExpenses = (
+        form.expenses || []
+      )
+        .map((expense) => ({
+          ...expense,
+          description:
+            expense.description.trim(),
+          amount: Number(
+            expense.amount || 0,
+          ),
+        }))
+        .filter(
+          (expense) =>
+            expense.description ||
+            expense.amount > 0,
+        )
+      const extrasSubtotal =
+        normalizedExpenses.reduce(
+          (total, expense) =>
+            total + expense.amount,
+          0,
+        )
+      const extrasTax =
+        form.extraTaxEnabled
+          ? extrasSubtotal * 0.16
+          : 0
+      const finalTotal =
+        Number(form.quotedTotal || 0) +
+        extrasSubtotal +
+        extrasTax
+      const paidAmount = Number(
+        form.paidAmount || 0,
+      )
+      const pendingAmount = Math.max(
+        0,
+        finalTotal - paidAmount,
+      )
+
       await onSave(
         {
           ...form,
+          expenses: normalizedExpenses,
+          extrasSubtotal,
+          extrasTax,
+          finalTotal,
+          pendingAmount,
+          financialStatus:
+            pendingAmount <= 0.01
+              ? 'liquidada'
+              : paidAmount > 0
+                ? 'anticipo'
+                : 'pendiente',
         },
         action,
       )
@@ -426,22 +534,30 @@ function ServiceFormModal({
               styles.headerBrand
             }
           >
-            <div
-              className={
-                styles.headerSymbol
+            <img
+              src={
+                companyConfiguration.logoUrl ||
+                branding.logos
+                  .horizontalSimpleDarkBackground
               }
-            >
-              A
-            </div>
+              alt={branding.appName}
+              className={styles.brandLogo}
+            />
 
-            <div>
-              <span>AMPERIUM</span>
+            <div className={styles.headerText}>
+              <span>
+                Gestión de servicios
+              </span>
 
               <h2>
                 {service
                   ? 'Editar servicio'
                   : 'Nuevo servicio'}
               </h2>
+
+              <p>
+                Registra el cliente, la fecha y los detalles del trabajo.
+              </p>
             </div>
           </div>
 
@@ -864,6 +980,158 @@ function ServiceFormModal({
                 />
               </label>
             </div>
+          </section>
+
+          <section
+            className={styles.section}
+          >
+            <div className={styles.sectionTitleRow}>
+              <div>
+                <h3>
+                  Extras y materiales cobrables
+                </h3>
+
+                <p>
+                  Agrega trabajos o materiales que se cobrarán además del importe original.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                className={styles.addExpenseButton}
+                onClick={addExpense}
+              >
+                + Agregar movimiento
+              </button>
+            </div>
+
+            <div className={styles.financialInputs}>
+              <label>
+                Importe base del servicio
+
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={form.quotedTotal}
+                  onChange={(event) =>
+                    updateField(
+                      'quotedTotal',
+                      event.target.value,
+                    )
+                  }
+                />
+              </label>
+
+              <label className={styles.taxCheck}>
+                <input
+                  type="checkbox"
+                  checked={
+                    form.extraTaxEnabled
+                  }
+                  onChange={(event) =>
+                    updateField(
+                      'extraTaxEnabled',
+                      event.target.checked,
+                    )
+                  }
+                />
+
+                <span>
+                  Aplicar IVA (16%) a los extras
+                </span>
+              </label>
+            </div>
+
+            {(form.expenses || []).length ? (
+              <div className={styles.expenseList}>
+                {form.expenses.map(
+                  (expense) => (
+                    <div
+                      className={styles.expenseRow}
+                      key={expense.id}
+                    >
+                      <input
+                        value={expense.description}
+                        onChange={(event) =>
+                          updateExpense(
+                            expense.id,
+                            'description',
+                            event.target.value,
+                          )
+                        }
+                        placeholder="Extensión, material o trabajo adicional"
+                      />
+
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={expense.amount}
+                        onChange={(event) =>
+                          updateExpense(
+                            expense.id,
+                            'amount',
+                            event.target.value,
+                          )
+                        }
+                        placeholder="$0.00"
+                      />
+
+                      <input
+                        type="date"
+                        value={expense.date}
+                        onChange={(event) =>
+                          updateExpense(
+                            expense.id,
+                            'date',
+                            event.target.value,
+                          )
+                        }
+                      />
+
+                      <button
+                        type="button"
+                        className={styles.removeExpenseButton}
+                        onClick={() =>
+                          removeExpense(
+                            expense.id,
+                          )
+                        }
+                        aria-label="Eliminar movimiento"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ),
+                )}
+
+                <strong className={styles.expenseTotal}>
+                  Total de extras:{' '}
+                  {new Intl.NumberFormat(
+                    'es-MX',
+                    {
+                      style: 'currency',
+                      currency: 'MXN',
+                    },
+                  ).format(
+                    form.expenses.reduce(
+                      (total, expense) =>
+                        total +
+                        Number(
+                          expense.amount ||
+                            0,
+                        ),
+                      0,
+                    ),
+                  )}
+                </strong>
+              </div>
+            ) : (
+              <div className={styles.emptyExpenses}>
+                Aún no hay extras registrados.
+              </div>
+            )}
           </section>
 
           <section

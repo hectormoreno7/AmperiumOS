@@ -1,7 +1,10 @@
 import { useRegisterSW } from 'virtual:pwa-register/react'
+import { useState } from 'react'
 import styles from './UpdatePrompt.module.css'
 
 function UpdatePrompt() {
+  const [updating, setUpdating] =
+    useState(false)
   const {
     needRefresh: [needRefresh, setNeedRefresh],
     offlineReady: [offlineReady, setOfflineReady],
@@ -19,6 +22,22 @@ function UpdatePrompt() {
   const closePrompt = () => {
     setNeedRefresh(false)
     setOfflineReady(false)
+  }
+
+  const installUpdate = async () => {
+    if (updating) return
+
+    setUpdating(true)
+
+    try {
+      await updateServiceWorker(true)
+    } catch (error) {
+      console.error(
+        'No fue posible instalar la actualización:',
+        error,
+      )
+      setUpdating(false)
+    }
   }
 
   return (
@@ -46,9 +65,12 @@ function UpdatePrompt() {
           <button
             type="button"
             className={styles.primaryButton}
-            onClick={() => updateServiceWorker(true)}
+            onClick={installUpdate}
+            disabled={updating}
           >
-            Actualizar ahora
+            {updating
+              ? 'Actualizando...'
+              : 'Actualizar ahora'}
           </button>
         )}
 

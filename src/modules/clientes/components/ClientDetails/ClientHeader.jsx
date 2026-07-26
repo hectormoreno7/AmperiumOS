@@ -3,6 +3,7 @@ import {
     MessageCircle,
     Pencil,
     MapPin,
+    Trash2,
 } from "lucide-react";
 
 import styles from "./ClientHeader.module.css";
@@ -12,7 +13,13 @@ function getClientName(client) {
 }
 
 function getClientPhone(client) {
-    return client?.phone || client?.telefono || "";
+    return (
+        client?.phones?.find(Boolean) ||
+        client?.telefonos?.find(Boolean) ||
+        client?.phone ||
+        client?.telefono ||
+        ""
+    );
 }
 
 function getClientAddress(client) {
@@ -45,6 +52,7 @@ function isClientActive(client) {
 export default function ClientHeader({
     client,
     onEdit,
+    onDelete,
 }) {
     if (!client) {
         return null;
@@ -61,7 +69,7 @@ export default function ClientHeader({
             return;
         }
 
-        window.location.href = `tel:${phone}`;
+        window.location.href = `tel:${phone.replace(/[^\d+]/g, "")}`;
     };
 
     const openWhatsApp = () => {
@@ -163,6 +171,15 @@ export default function ClientHeader({
                 >
                     <Pencil size={16} strokeWidth={1.8} />
                     <span>Editar</span>
+                </button>
+
+                <button
+                    type="button"
+                    className={styles.deleteButton}
+                    onClick={onDelete}
+                >
+                    <Trash2 size={16} strokeWidth={1.8} />
+                    <span>Eliminar</span>
                 </button>
             </div>
         </section>

@@ -2,6 +2,7 @@ import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import logoSimpleUrl from '../../../assets/branding/logos/logo-horizontal-simple.png'
 import isotipoUrl from '../../../assets/branding/logos/isotipo.png'
+import { getConfiguration } from '../../configuracion/services/configuracionService'
 
 const COMPANY = {
   responsible: 'Ing. Héctor Zárate',
@@ -14,6 +15,25 @@ const GOLD = [212, 160, 23]
 const GRAPHITE = [28, 29, 32]
 const MID_GRAY = [92, 95, 101]
 const LIGHT_GRAY = [224, 225, 228]
+
+const colorToRgb = (
+  color,
+  fallback,
+) => {
+  const match = String(color).match(
+    /^#([0-9a-f]{6})$/i,
+  )
+  if (!match) return fallback
+  const value = Number.parseInt(
+    match[1],
+    16,
+  )
+  return [
+    (value >> 16) & 255,
+    (value >> 8) & 255,
+    value & 255,
+  ]
+}
 
 const PAGE = {
   width: 215.9,
@@ -76,6 +96,65 @@ const imageUrlToDataUrl = async (url) => {
     reader.readAsDataURL(blob)
   })
 }
+
+const removeWhiteImageBackground = (
+  source,
+) =>
+  new Promise((resolve) => {
+    if (!source) {
+      resolve(source)
+      return
+    }
+
+    const image = new Image()
+
+    image.onerror = () =>
+      resolve(source)
+
+    image.onload = () => {
+      const canvas =
+        document.createElement('canvas')
+      canvas.width = image.width
+      canvas.height = image.height
+
+      const context =
+        canvas.getContext('2d')
+      context.drawImage(image, 0, 0)
+
+      const pixels =
+        context.getImageData(
+          0,
+          0,
+          canvas.width,
+          canvas.height,
+        )
+
+      for (
+        let index = 0;
+        index < pixels.data.length;
+        index += 4
+      ) {
+        if (
+          pixels.data[index] > 245 &&
+          pixels.data[index + 1] > 245 &&
+          pixels.data[index + 2] > 245
+        ) {
+          pixels.data[index + 3] = 0
+        }
+      }
+
+      context.putImageData(
+        pixels,
+        0,
+        0,
+      )
+      resolve(
+        canvas.toDataURL('image/png'),
+      )
+    }
+
+    image.src = source
+  })
 
 const addImageContained = (
   doc,
@@ -653,11 +732,13 @@ const addBulletList = (
   y,
   width,
   numbered = false,
+  fontSize = 7.3,
+  lineHeight = 4.1,
 ) => {
   const lines = splitLines(text)
 
   doc.setFont('helvetica', 'normal')
-  doc.setFontSize(7.3)
+  doc.setFontSize(fontSize)
   doc.setTextColor(...GRAPHITE)
 
   let currentY = y
@@ -680,7 +761,7 @@ const addBulletList = (
     )
 
     currentY +=
-      wrapped.length * 4.1
+      wrapped.length * lineHeight
   })
 
   return currentY
@@ -778,8 +859,9 @@ const addProjectImage = (
 const addSignatures = (
   doc,
   quotation,
+  signatureY = 236,
 ) => {
-  const y = 236
+  const y = signatureY
   const leftX = 15
   const rightX = 118
   const width = 82
@@ -864,16 +946,61 @@ const addSignatures = (
 export const generateQuotationPdf = async (
   quotation,
 ) => {
+  const configuration =
+    await getConfiguration()
+  Object.assign(COMPANY, {
+    responsible:
+      configuration.responsibleName,
+    phone: configuration.phone,
+    email: configuration.email,
+    location: configuration.address,
+  })
+  GOLD.splice(
+    0,
+    3,
+    ...colorToRgb(
+      configuration.primaryColor,
+      GOLD,
+    ),
+  )
+  GRAPHITE.splice(
+    0,
+    3,
+    ...colorToRgb(
+      configuration.secondaryColor,
+      GRAPHITE,
+    ),
+  )
+
   const [logo, isotipo] =
     await Promise.all([
       imageUrlToDataUrl(
-        logoSimpleUrl,
+        configuration.logoUrl ||
+          logoSimpleUrl,
       ).catch(() => null),
 
       imageUrlToDataUrl(
         isotipoUrl,
       ).catch(() => null),
     ])
+
+  const [
+    clientSignature,
+    responsibleSignature,
+  ] = await Promise.all([
+    removeWhiteImageBackground(
+      quotation.clientSignature,
+    ),
+    removeWhiteImageBackground(
+      quotation.responsibleSignature,
+    ),
+  ])
+
+  quotation = {
+    ...quotation,
+    clientSignature,
+    responsibleSignature,
+  }
 
   const assets = {
     logo,
@@ -1149,11 +1276,14 @@ export const generateQuotationPdf = async (
     conditionsTop + 7,
     188,
     true,
+    6.2,
+    3.25,
   )
 
   addSignatures(
     doc,
     quotation,
+    241,
   )
 
   addFooter(doc)

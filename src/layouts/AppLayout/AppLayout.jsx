@@ -16,12 +16,19 @@ import {
   getModuleByPath,
 } from '../../shared/constants/modules'
 import styles from './AppLayout.module.css'
+import useCompanyConfiguration from '../../modules/configuracion/hooks/useCompanyConfiguration'
 
 const RELEASE_STORAGE_KEY = 'amperium-last-seen-version'
 const RELEASE_READ_EVENT = 'amperium-release-notes-read'
 const OPEN_RELEASE_EVENT = 'amperium-open-release-notes'
 
 function AppLayout() {
+  const companyConfiguration =
+    useCompanyConfiguration()
+  const companyLogo =
+    companyConfiguration.logoUrl
+  const companyIcon =
+    companyConfiguration.iconUrl
   const location = useLocation()
   const userMenuRef = useRef(null)
   const { user, logout } = useAuth()
@@ -236,8 +243,8 @@ function AppLayout() {
                   styles.brandHorizontal
                 }
                 src={
-                  branding.logos
-                    .horizontalSimpleDarkBackground
+                  companyLogo ||
+                  branding.logos.horizontalSimpleDarkBackground
                 }
                 alt={branding.companyName}
               />
@@ -245,8 +252,9 @@ function AppLayout() {
               <img
                 className={styles.brandIsotipo}
                 src={
-                  branding.logos
-                    .isotipoDarkBackground
+                  companyIcon ||
+                  companyLogo ||
+                  branding.logos.isotipoDarkBackground
                 }
                 alt={branding.companyName}
               />
@@ -328,8 +336,8 @@ function AppLayout() {
             >
               <img
                 src={
-                  branding.appLogos
-                    .completeDarkBackground
+                  companyLogo ||
+                  branding.appLogos.completeDarkBackground
                 }
                 alt={branding.appName}
                 className={
@@ -382,7 +390,10 @@ function AppLayout() {
               }
             >
               <img
-                src={branding.appLogos.complete}
+                src={
+                  companyLogo ||
+                  branding.appLogos.complete
+                }
                 alt={branding.appName}
                 className={
                   styles.topbarBrandLogo

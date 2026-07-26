@@ -4,9 +4,8 @@ import { COLLECTIONS, SETTINGS_DOCUMENTS } from '../constants/collections'
 
 export const FOLIO_TYPES = Object.freeze({
   QUOTATION: 'C',
+  SERVICE: 'S',
   NOTE: 'N',
-  SERVICE_FROM_QUOTATION: 'SC',
-  SERVICE_FROM_NOTE: 'SN',
 })
 
 const VALID_TYPES = new Set(Object.values(FOLIO_TYPES))

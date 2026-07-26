@@ -22,8 +22,7 @@ function SignaturePad({ label, value, onChange }) {
     context.lineCap = 'round'
     context.lineJoin = 'round'
     context.strokeStyle = '#17191d'
-    context.fillStyle = '#ffffff'
-    context.fillRect(0, 0, width, height)
+    context.clearRect(0, 0, width, height)
 
     if (value) {
       const image = new Image()
@@ -72,8 +71,6 @@ function SignaturePad({ label, value, onChange }) {
     const canvas = canvasRef.current
     const context = canvas.getContext('2d')
     context.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight)
-    context.fillStyle = '#ffffff'
-    context.fillRect(0, 0, canvas.clientWidth, canvas.clientHeight)
     setHasSignature(false)
     onChange('')
   }

@@ -17,6 +17,9 @@ export default defineConfig({
     VitePWA({
       registerType: 'prompt',
       injectRegister: null,
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.js',
 
       includeAssets: [
         'favicon.svg',
@@ -53,11 +56,6 @@ export default defineConfig({
             purpose: 'maskable',
           },
         ],
-      },
-
-      workbox: {
-        cleanupOutdatedCaches: true,
-        navigateFallback: '/index.html',
       },
 
       devOptions: {

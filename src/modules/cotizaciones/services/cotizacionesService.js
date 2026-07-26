@@ -14,6 +14,7 @@ import { generateFolio, FOLIO_TYPES } from '../../../core/folios/folioService'
 
 const COLLECTION_NAME = 'cotizaciones'
 const CLIENTS_COLLECTION = 'clientes'
+const SERVICES_COLLECTION = 'servicios'
 const quotationsCollection = collection(db, COLLECTION_NAME)
 const TAX_RATE = 0.16
 
@@ -157,12 +158,42 @@ const normalizeQuotationDocument = (snapshot) => {
   const totals = calculateQuotationTotals(items, taxEnabled, advanceRate)
   const payments = normalizePayments(data.payments)
   const financial = calculateFinancialSummary(totals.total, payments)
+  const issuedAt = timestampToISOString(data.issuedAt)
+  const validUntil =
+    timestampToISOString(data.validUntil) ||
+    (issuedAt
+      ? new Date(
+          new Date(issuedAt).getTime() +
+            normalizeNumber(data.validityDays || 10) *
+              86400000,
+        ).toISOString()
+      : null)
+  const storedStatus =
+    normalizeText(data.status) || 'borrador'
+  const status =
+    storedStatus === 'enviada' &&
+    validUntil &&
+    new Date(validUntil).getTime() <
+      Date.now()
+      ? 'rechazada'
+      : storedStatus
 
   return {
     id: snapshot.id,
     folio: normalizeText(data.folio),
     sequence: normalizeNumber(data.sequence),
-    status: normalizeText(data.status) || 'borrador',
+    status,
+    linkedServiceId: normalizeText(
+      data.linkedServiceId,
+    ),
+    linkedServiceFolio: normalizeText(
+      data.linkedServiceFolio,
+    ),
+    archived: Boolean(data.archived),
+    archivedAt:
+      timestampToISOString(
+        data.archivedAt,
+      ),
     clientId: normalizeText(data.clientId),
     clientName: normalizeText(data.clientName),
     projectName: normalizeText(data.projectName),
@@ -191,7 +222,10 @@ const normalizeQuotationDocument = (snapshot) => {
     totals,
     payments,
     ...financial,
-    issuedAt: timestampToISOString(data.issuedAt),
+    issuedAt,
+    validUntil,
+    acceptedAt: timestampToISOString(data.acceptedAt),
+    rejectedAt: timestampToISOString(data.rejectedAt),
     createdAt: timestampToISOString(data.createdAt) ?? new Date().toISOString(),
     updatedAt:
       timestampToISOString(data.updatedAt) ??
@@ -212,6 +246,15 @@ const prepareQuotationData = (quotation) => {
     folio: normalizeText(quotation.folio),
     sequence: normalizeNumber(quotation.sequence),
     status: normalizeText(quotation.status) || 'borrador',
+    linkedServiceId: normalizeText(
+      quotation.linkedServiceId,
+    ),
+    linkedServiceFolio: normalizeText(
+      quotation.linkedServiceFolio,
+    ),
+    archived: Boolean(
+      quotation.archived,
+    ),
     clientId: normalizeText(quotation.clientId),
     clientName: normalizeText(quotation.clientName),
     projectName: normalizeText(quotation.projectName),
@@ -312,6 +355,10 @@ export const updateQuotation = async (quotationId, quotation, previousClientId =
 
 export const finalizeQuotation = async (quotationId, quotation, previousClientId = '') => {
   const prepared = prepareQuotationData(quotation)
+  const validUntil = new Date(
+    Date.now() +
+      prepared.validityDays * 86400000,
+  ).toISOString()
 
   if (quotationId && quotation.folio) {
     const finalData = {
@@ -319,6 +366,7 @@ export const finalizeQuotation = async (quotationId, quotation, previousClientId
       folio: quotation.folio,
       sequence: quotation.sequence || prepared.sequence,
       status: 'enviada',
+      validUntil,
     }
 
     await updateQuotation(quotationId, finalData, previousClientId)
@@ -331,6 +379,7 @@ export const finalizeQuotation = async (quotationId, quotation, previousClientId
     folio: folioData.folio,
     sequence: folioData.sequence,
     status: 'enviada',
+    validUntil,
   }
 
   if (quotationId) {
@@ -357,6 +406,48 @@ export const finalizeQuotation = async (quotationId, quotation, previousClientId
 
   await updateClientQuotationCount(prepared.clientId, 1)
   return { id: reference.id, ...finalData }
+}
+
+export const acceptQuotation = async (
+  quotationId,
+  linkedService,
+) => {
+  if (!quotationId || !linkedService?.id) {
+    throw new Error(
+      'No fue posible vincular la cotización con el servicio.',
+    )
+  }
+
+  await updateDoc(
+    doc(db, COLLECTION_NAME, quotationId),
+    {
+      status: 'aceptada',
+      linkedServiceId: linkedService.id,
+      linkedServiceFolio:
+        linkedService.folio || '',
+      acceptedAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    },
+  )
+}
+
+export const rejectQuotation = async (
+  quotationId,
+) => {
+  if (!quotationId) {
+    throw new Error(
+      'No se recibió la cotización.',
+    )
+  }
+
+  await updateDoc(
+    doc(db, COLLECTION_NAME, quotationId),
+    {
+      status: 'rechazada',
+      rejectedAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    },
+  )
 }
 
 export const addQuotationPayment = async (quotationId, payment) => {
@@ -393,12 +484,91 @@ export const addQuotationPayment = async (quotationId, payment) => {
 
     const payments = [newPayment, ...currentPayments]
     const financial = calculateFinancialSummary(total, payments)
+    const linkedServiceReference =
+      data.linkedServiceId
+        ? doc(
+            db,
+            SERVICES_COLLECTION,
+            data.linkedServiceId,
+          )
+        : null
+    const linkedServiceSnapshot =
+      linkedServiceReference
+        ? await transaction.get(
+            linkedServiceReference,
+          )
+        : null
+    const linkedServiceFinished =
+      linkedServiceSnapshot?.exists() &&
+      linkedServiceSnapshot.data()
+        ?.status === 'finalizado'
+    const shouldArchive =
+      financial.financialStatus ===
+        'liquidada' &&
+      (
+        !data.linkedServiceId ||
+        linkedServiceFinished
+      )
 
     transaction.update(reference, {
       payments,
       ...financial,
+      archived: shouldArchive,
+      ...(shouldArchive
+        ? {
+            archivedAt:
+              serverTimestamp(),
+          }
+        : {}),
       updatedAt: serverTimestamp(),
     })
+
+    if (
+      linkedServiceReference &&
+      linkedServiceSnapshot?.exists()
+    ) {
+      const serviceData =
+        linkedServiceSnapshot.data()
+      const serviceTotal =
+        normalizeNumber(
+          serviceData.finalTotal ||
+            serviceData.quotedTotal ||
+            total,
+        )
+      const servicePending = Math.max(
+        0,
+        serviceTotal -
+          financial.paidAmount,
+      )
+
+      transaction.update(
+        linkedServiceReference,
+        {
+          paidAmount:
+            financial.paidAmount,
+          pendingAmount:
+            servicePending,
+          financialStatus:
+            servicePending <= 0.01
+              ? 'liquidada'
+              : financial.paidAmount >
+                    0
+                ? 'anticipo'
+                : 'pendiente',
+          archived:
+            linkedServiceFinished &&
+            servicePending <= 0.01,
+          ...(linkedServiceFinished &&
+          servicePending <= 0.01
+            ? {
+                archivedAt:
+                  serverTimestamp(),
+              }
+            : {}),
+          updatedAt: serverTimestamp(),
+        },
+      )
+    }
   })
 }
 
@@ -416,12 +586,78 @@ export const removeQuotationPayment = async (quotationId, paymentId) => {
       (payment) => payment.id !== paymentId,
     )
     const financial = calculateFinancialSummary(data.totals?.total || 0, payments)
+    const linkedServiceReference =
+      data.linkedServiceId
+        ? doc(
+            db,
+            SERVICES_COLLECTION,
+            data.linkedServiceId,
+          )
+        : null
+    const linkedServiceSnapshot =
+      linkedServiceReference
+        ? await transaction.get(
+            linkedServiceReference,
+          )
+        : null
+    const linkedServiceFinished =
+      linkedServiceSnapshot?.exists() &&
+      linkedServiceSnapshot.data()
+        ?.status === 'finalizado'
+    const shouldArchive =
+      financial.financialStatus ===
+        'liquidada' &&
+      (
+        !data.linkedServiceId ||
+        linkedServiceFinished
+      )
 
     transaction.update(reference, {
       payments,
       ...financial,
+      archived: shouldArchive,
       updatedAt: serverTimestamp(),
     })
+
+    if (
+      linkedServiceReference &&
+      linkedServiceSnapshot?.exists()
+    ) {
+      const serviceData =
+        linkedServiceSnapshot.data()
+      const serviceTotal =
+        normalizeNumber(
+          serviceData.finalTotal ||
+            serviceData.quotedTotal ||
+            data.totals?.total,
+        )
+      const servicePending = Math.max(
+        0,
+        serviceTotal -
+          financial.paidAmount,
+      )
+
+      transaction.update(
+        linkedServiceReference,
+        {
+          paidAmount:
+            financial.paidAmount,
+          pendingAmount:
+            servicePending,
+          financialStatus:
+            servicePending <= 0.01
+              ? 'liquidada'
+              : financial.paidAmount >
+                    0
+                ? 'anticipo'
+                : 'pendiente',
+          archived:
+            linkedServiceFinished &&
+            servicePending <= 0.01,
+          updatedAt: serverTimestamp(),
+        },
+      )
+    }
   })
 }
 
@@ -429,6 +665,19 @@ export const removeQuotation = async (quotation) => {
   const quotationId = typeof quotation === 'string' ? quotation : quotation?.id
   if (!quotationId) {
     throw new Error('No se recibió el identificador de la cotización.')
+  }
+
+  if (
+    typeof quotation === 'object' &&
+    (
+      quotation.status ===
+        'aceptada' ||
+      quotation.linkedServiceId
+    )
+  ) {
+    throw new Error(
+      'Las cotizaciones aceptadas no se pueden eliminar.',
+    )
   }
 
   await deleteDoc(doc(db, COLLECTION_NAME, quotationId))

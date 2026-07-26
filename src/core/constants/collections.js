@@ -4,6 +4,7 @@ export const COLLECTIONS = Object.freeze({
   QUOTATIONS: 'cotizaciones',
   NOTES: 'notas',
   SERVICES: 'servicios',
+  AGENDA: 'agenda',
   PAYMENTS: 'pagos',
   INVENTORY: 'inventario',
   RELEASES: 'app_releases',

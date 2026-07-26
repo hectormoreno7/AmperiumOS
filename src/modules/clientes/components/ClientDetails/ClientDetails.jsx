@@ -11,6 +11,7 @@ export default function ClientDetails({
     services = [],
     notes = [],
     onEdit,
+    onDelete,
     onOpenQuotation,
     onOpenService,
     onOpenNote,
@@ -32,6 +33,7 @@ export default function ClientDetails({
             <ClientHeader
                 client={client}
                 onEdit={onEdit}
+                onDelete={onDelete}
             />
 
             <ClientSummary

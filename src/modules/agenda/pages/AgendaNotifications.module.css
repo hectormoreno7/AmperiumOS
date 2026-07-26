@@ -1,0 +1,83 @@
+.control {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px 8px 13px;
+  border: 1px solid #b8bec5;
+  border-radius: 13px;
+  background: #f7f8f9;
+}
+
+.control > div {
+  display: grid;
+  gap: 1px;
+  text-align: right;
+}
+
+.control strong {
+  color: #25282c;
+  font-size: 13px;
+}
+
+.control span {
+  color: #70767d;
+  font-size: 10px;
+}
+
+.switch {
+  position: relative;
+  width: 51px;
+  height: 31px;
+  flex: 0 0 51px;
+  border: 0;
+  border-radius: 999px;
+  padding: 2px;
+  background: #aeb3b9;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .08);
+  cursor: pointer;
+  transition: background .2s ease;
+}
+
+.switch > span {
+  display: block;
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, .3);
+  transition: transform .2s ease;
+}
+
+.switchOn {
+  background: #34c759;
+}
+
+.switchOn > span {
+  transform: translateX(20px);
+}
+
+.switch:disabled {
+  cursor: default;
+  opacity: .55;
+}
+
+.notice {
+  margin: -3px 0 13px;
+  padding: 11px 13px;
+  border: 1px solid #d8c37f;
+  border-radius: 10px;
+  background: #fff8e5;
+  color: #61521f;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+@media (max-width: 700px) {
+  .control {
+    justify-content: space-between;
+  }
+
+  .control > div {
+    text-align: left;
+  }
+}

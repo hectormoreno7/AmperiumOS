@@ -25,46 +25,19 @@ import {
 import {
   createService,
   finalizeService,
+  liquidateService,
   removeService,
   subscribeToServices,
   updateService,
   updateServiceStatus,
 } from '../services/serviciosService'
+import {
+  generateServicePdf,
+} from '../services/serviciosPdfService'
 
 import ServiceFormModal from '../components/ServiceFormModal'
 
 import styles from './ServiciosPage.module.css'
-
-const STATUS_OPTIONS = [
-  {
-    value: 'todos',
-    label: 'Todos',
-  },
-  {
-    value: 'borrador',
-    label: 'Borradores',
-  },
-  {
-    value: 'programado',
-    label: 'Programados',
-  },
-  {
-    value: 'en_proceso',
-    label: 'En proceso',
-  },
-  {
-    value: 'finalizado',
-    label: 'Finalizados',
-  },
-  {
-    value: 'cancelado',
-    label: 'Cancelados',
-  },
-  {
-    value: 'archivado',
-    label: 'Archivados',
-  },
-]
 
 const STATUS_LABELS = {
   borrador: 'Borrador',
@@ -91,6 +64,12 @@ const normalizeText = (value) =>
       /[\u0300-\u036f]/g,
       '',
     )
+
+const money = (value) =>
+  new Intl.NumberFormat('es-MX', {
+    style: 'currency',
+    currency: 'MXN',
+  }).format(Number(value || 0))
 
 const getServiceIdentifier = (
   service,
@@ -133,10 +112,8 @@ function ServiciosPage() {
   const [search, setSearch] =
     useState('')
 
-  const [
-    statusFilter,
-    setStatusFilter,
-  ] = useState('todos')
+  const [view, setView] =
+    useState('active')
 
   const [modalOpen, setModalOpen] =
     useState(false)
@@ -265,13 +242,20 @@ function ServiciosPage() {
 
       return services.filter(
         (service) => {
-          const matchesStatus =
-            statusFilter ===
-              'todos' ||
-            service.status ===
-              statusFilter
+          const isArchived =
+            service.archived ||
+            (
+              service.status ===
+                'finalizado' &&
+              service.financialStatus ===
+                'liquidada'
+            )
 
-          if (!matchesStatus) {
+          if (
+            view === 'history'
+              ? !isArchived
+              : isArchived
+          ) {
             return false
           }
 
@@ -299,29 +283,8 @@ function ServiciosPage() {
     }, [
       search,
       services,
-      statusFilter,
+      view,
     ])
-
-  const summary = useMemo(
-    () => ({
-      total: services.length,
-
-      pending: services.filter(
-        (service) =>
-          service.status ===
-            'programado' ||
-          service.status ===
-            'en_proceso',
-      ).length,
-
-      completed: services.filter(
-        (service) =>
-          service.status ===
-          'finalizado',
-      ).length,
-    }),
-    [services],
-  )
 
   const openNewService = () => {
     setEditingService(null)
@@ -445,6 +408,16 @@ function ServiciosPage() {
   const handleDelete = async (
     service,
   ) => {
+    if (
+      service.originQuotationId ||
+      service.status === 'finalizado'
+    ) {
+      setError(
+        'Los servicios vinculados o finalizados forman parte del historial y no se pueden eliminar.',
+      )
+      return
+    }
+
     const confirmed =
       window.confirm(
         `¿Eliminar el servicio ${
@@ -470,93 +443,76 @@ function ServiciosPage() {
     }
   }
 
-  const handleStatusChange =
-    async (
-      service,
-      nextStatus,
-    ) => {
-      try {
-        setError('')
-
-        await updateServiceStatus(
-          service.id,
-          nextStatus,
-        )
-      } catch (statusError) {
-        setError(
-          statusError.message ||
-            'No fue posible actualizar el estado.',
-        )
-      }
+  const handlePdf = async (service) => {
+    try {
+      await generateServicePdf(service)
+    } catch (pdfError) {
+      console.error(pdfError)
+      setError(
+        'No fue posible generar el PDF del servicio.',
+      )
     }
+  }
+
+  const handleFinalize = async (
+    service,
+  ) => {
+    const confirmed = window.confirm(
+      `¿Finalizar ${service.folio || service.title} y generar su PDF?`,
+    )
+
+    if (!confirmed) {
+      return
+    }
+
+    try {
+      setError('')
+      await updateServiceStatus(
+        service.id,
+        'finalizado',
+        service,
+      )
+      await generateServicePdf({
+        ...service,
+        status: 'finalizado',
+        completedAt:
+          new Date().toISOString(),
+      })
+    } catch (finalizeError) {
+      setError(
+        finalizeError?.message ||
+          'No fue posible finalizar el servicio.',
+      )
+    }
+  }
+
+  const handleLiquidate = async (
+    service,
+  ) => {
+    const confirmed = window.confirm(
+      `¿Liquidar el saldo de ${money(
+        service.pendingAmount,
+      )}?`,
+    )
+
+    if (!confirmed) {
+      return
+    }
+
+    try {
+      await liquidateService(service)
+    } catch (paymentError) {
+      setError(
+        paymentError?.message ||
+          'No fue posible liquidar el servicio.',
+      )
+    }
+  }
 
   return (
     <section
       className={styles.page}
     >
-      <header
-        className={
-          styles.pageHeader
-        }
-      >
-        <div
-          className={styles.brandMark}
-        >
-          A
-        </div>
-
-        <div>
-          <span
-            className={styles.eyebrow}
-          >
-            AMPERIUM OS
-          </span>
-
-          <h1>Servicios</h1>
-
-          <p>
-            Registra, programa y da
-            seguimiento a los trabajos.
-          </p>
-        </div>
-      </header>
-
-      <div
-        className={
-          styles.summaryGrid
-        }
-      >
-        <article>
-          <span>
-            Servicios registrados
-          </span>
-
-          <strong>
-            {summary.total}
-          </strong>
-        </article>
-
-        <article>
-          <span>
-            Pendientes
-          </span>
-
-          <strong>
-            {summary.pending}
-          </strong>
-        </article>
-
-        <article>
-          <span>
-            Finalizados
-          </span>
-
-          <strong>
-            {summary.completed}
-          </strong>
-        </article>
-      </div>
-
       <div
         className={styles.toolbar}
       >
@@ -570,30 +526,34 @@ function ServiciosPage() {
           placeholder="Buscar por folio, cliente, servicio o dirección..."
         />
 
-        <div
-          className={styles.filters}
-        >
-          {STATUS_OPTIONS.map(
-            (option) => (
-              <button
-                key={option.value}
-                type="button"
-                className={
-                  statusFilter ===
-                  option.value
-                    ? styles.filterActive
-                    : ''
-                }
-                onClick={() =>
-                  setStatusFilter(
-                    option.value,
-                  )
-                }
-              >
-                {option.label}
-              </button>
-            ),
-          )}
+        <div className={styles.viewSwitch}>
+          <button
+            type="button"
+            className={
+              view === 'active'
+                ? styles.viewActive
+                : ''
+            }
+            onClick={() =>
+              setView('active')
+            }
+          >
+            Activos
+          </button>
+
+          <button
+            type="button"
+            className={
+              view === 'history'
+                ? styles.viewActive
+                : ''
+            }
+            onClick={() =>
+              setView('history')
+            }
+          >
+            Historial
+          </button>
         </div>
       </div>
 
@@ -618,7 +578,9 @@ function ServiciosPage() {
           }
         >
           <strong>
-            Historial de servicios
+            {view === 'history'
+              ? 'Historial de servicios'
+              : 'Servicios activos'}
           </strong>
 
           <span>
@@ -762,6 +724,68 @@ function ServiciosPage() {
                     </div>
                   </div>
 
+                  {service.originQuotationFolio ||
+                  service.quotedTotal > 0 ||
+                  service.expenses?.length ? (
+                    <div
+                      className={
+                        styles.financePanel
+                      }
+                    >
+                      {service.originQuotationFolio ? (
+                        <span>
+                          Origen:{' '}
+                          <strong>
+                            {
+                              service.originQuotationFolio
+                            }
+                          </strong>
+                        </span>
+                      ) : null}
+
+                      <div>
+                        <span>
+                          Total final
+                          <strong>
+                            {money(
+                              service.finalTotal ||
+                                service.quotedTotal,
+                            )}
+                          </strong>
+                        </span>
+
+                        <span>
+                          Pagado
+                          <strong>
+                            {money(
+                              service.paidAmount,
+                            )}
+                          </strong>
+                        </span>
+
+                        <span>
+                          Extras
+                          <strong>
+                            {money(
+                              service.expenses?.reduce(
+                                (
+                                  total,
+                                  expense,
+                                ) =>
+                                  total +
+                                  Number(
+                                    expense.amount ||
+                                      0,
+                                  ),
+                                0,
+                              ),
+                            )}
+                          </strong>
+                        </span>
+                      </div>
+                    </div>
+                  ) : null}
+
                   {service.address ? (
                     <div
                       className={
@@ -778,51 +802,6 @@ function ServiciosPage() {
                       </span>
                     </div>
                   ) : null}
-
-                  <div
-                    className={
-                      styles.statusControls
-                    }
-                  >
-                    <select
-                      value={
-                        service.status
-                      }
-                      onChange={(
-                        event,
-                      ) =>
-                        handleStatusChange(
-                          service,
-                          event.target
-                            .value,
-                        )
-                      }
-                    >
-                      <option value="borrador">
-                        Borrador
-                      </option>
-
-                      <option value="programado">
-                        Programado
-                      </option>
-
-                      <option value="en_proceso">
-                        En proceso
-                      </option>
-
-                      <option value="finalizado">
-                        Finalizado
-                      </option>
-
-                      <option value="cancelado">
-                        Cancelado
-                      </option>
-
-                      <option value="archivado">
-                        Archivado
-                      </option>
-                    </select>
-                  </div>
 
                   <div
                     className={
@@ -863,23 +842,90 @@ function ServiciosPage() {
                       Ver / editar
                     </button>
 
-                    <button
-                      type="button"
-                      className={
-                        styles.deleteButton
-                      }
-                      onClick={() =>
-                        handleDelete(
-                          service,
-                        )
-                      }
-                    >
-                      <Trash2
-                        size={16}
-                      />
+                    {service.originQuotationId ? (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          window.location.assign(
+                            `/cotizaciones?open=${encodeURIComponent(
+                              service.originQuotationId,
+                            )}`,
+                          )
+                        }
+                      >
+                        Ver cotización
+                      </button>
+                    ) : null}
 
-                      Eliminar
-                    </button>
+                    {service.folio &&
+                    service.status !==
+                      'finalizado' ? (
+                      <button
+                        type="button"
+                        className={
+                          styles.finalizeButton
+                        }
+                        onClick={() =>
+                          handleFinalize(
+                            service,
+                          )
+                        }
+                      >
+                        Finalizar y generar PDF
+                      </button>
+                    ) : null}
+
+                    {service.pendingAmount >
+                    0 ? (
+                      <button
+                        type="button"
+                        className={
+                          styles.liquidateButton
+                        }
+                        onClick={() =>
+                          handleLiquidate(
+                            service,
+                          )
+                        }
+                      >
+                        Liquidar
+                      </button>
+                    ) : null}
+
+                    {service.folio &&
+                    service.status ===
+                      'finalizado' ? (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handlePdf(service)
+                        }
+                      >
+                        PDF final
+                      </button>
+                    ) : null}
+
+                    {!service.originQuotationId &&
+                    service.status ===
+                      'borrador' ? (
+                      <button
+                        type="button"
+                        className={
+                          styles.deleteButton
+                        }
+                        onClick={() =>
+                          handleDelete(
+                            service,
+                          )
+                        }
+                      >
+                        <Trash2
+                          size={16}
+                        />
+
+                        Eliminar
+                      </button>
+                    ) : null}
                   </div>
                 </article>
               ),

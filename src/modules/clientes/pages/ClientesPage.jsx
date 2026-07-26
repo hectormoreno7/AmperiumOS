@@ -137,6 +137,7 @@ export default function ClientesPage() {
 
         setError,
         saveClient,
+        deleteClient,
     } = useClients();
 
     const clientQuotations = selectedClient
@@ -186,6 +187,39 @@ export default function ClientesPage() {
 
         setEditingClient(selectedClient);
         setModalOpen(true);
+    };
+
+    const deleteSelectedClient = async () => {
+        if (!selectedClient?.id) {
+            return;
+        }
+
+        const relatedCount =
+            clientQuotations.length +
+            clientServices.length +
+            clientNotes.length;
+        const historyMessage = relatedCount
+            ? ` Sus ${relatedCount} documentos relacionados se conservarán en el historial.`
+            : "";
+
+        if (
+            !window.confirm(
+                `¿Eliminar a ${selectedClient.name || "este cliente"}?${historyMessage}`
+            )
+        ) {
+            return;
+        }
+
+        const result = await deleteClient(
+            selectedClient.id
+        );
+
+        if (!result?.success) {
+            window.alert(
+                result?.error ||
+                    "No fue posible eliminar el cliente."
+            );
+        }
     };
 
     const openQuotation = (quotation) => {
@@ -355,6 +389,9 @@ export default function ClientesPage() {
                             notes={clientNotes}
                             onEdit={
                                 editSelectedClient
+                            }
+                            onDelete={
+                                deleteSelectedClient
                             }
                             onOpenQuotation={
                                 openQuotation

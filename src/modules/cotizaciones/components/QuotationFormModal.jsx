@@ -8,6 +8,8 @@ import {
   calculateQuotationItem,
   calculateQuotationTotals,
 } from '../services/cotizacionesService'
+import branding from '../../../shared/constants/branding'
+import useCompanyConfiguration from '../../configuracion/hooks/useCompanyConfiguration'
 import styles from './QuotationFormModal.module.css'
 
 const GENERAL_CONDITIONS = `La presente cotización tiene vigencia de 10 días naturales a partir de la fecha de emisión.
@@ -147,6 +149,8 @@ function QuotationFormModal({
   onClose,
   onSave,
 }) {
+  const companyConfiguration =
+    useCompanyConfiguration()
   const [form, setForm] =
     useState(INITIAL_FORM)
 
@@ -403,20 +407,28 @@ function QuotationFormModal({
           <div
             className={styles.headerBrand}
           >
-            <div
-              className={styles.headerSymbol}
-            >
-              A
-            </div>
+            <img
+              src={
+                companyConfiguration.logoUrl ||
+                branding.logos
+                  .horizontalSimpleDarkBackground
+              }
+              alt={branding.appName}
+              className={styles.brandLogo}
+            />
 
-            <div>
-              <span>AMPERIUM</span>
+            <div className={styles.headerText}>
+              <span>Gestión de cotizaciones</span>
 
               <h2>
                 {quotation
                   ? 'Editar cotización'
                   : 'Nueva cotización'}
               </h2>
+
+              <p>
+                Registra el cliente, los conceptos y las condiciones comerciales.
+              </p>
             </div>
           </div>
 

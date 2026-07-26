@@ -10,6 +10,10 @@ import DashboardPage from '../modules/dashboard/pages/DashboardPage'
 import ClientesPage from '../modules/clientes/pages/ClientesPage'
 import CotizacionesPage from '../modules/cotizaciones/pages/CotizacionesPage'
 import ServiciosPage from '../modules/servicios/pages/ServiciosPage'
+import HistorialPage from '../modules/historial/pages/HistorialPage'
+import AgendaPage from '../modules/agenda/pages/AgendaPage'
+import ConfiguracionPage from '../modules/configuracion/pages/ConfiguracionPage'
+import NotasPage from '../modules/notas/pages/NotasPage'
 
 import ModulePlaceholderPage from '../shared/pages/ModulePlaceholderPage'
 
@@ -50,27 +54,27 @@ function AppRoutes() {
         />
 
         <Route
+          path="/historial"
+          element={<HistorialPage />}
+        />
+
+        <Route
           path="/notas"
-          element={
-            <ModulePlaceholderPage
-              title="Notas"
-              description="Genera notas de venta, registra pagos y controla saldos pendientes."
-            />
-          }
+          element={<NotasPage />}
         />
 
         <Route
           path="/agenda"
-          element={
-            <ModulePlaceholderPage
-              title="Agenda"
-              description="Organiza visitas, servicios, instalaciones y recordatorios."
-            />
-          }
+          element={<AgendaPage />}
         />
 
         <Route
           path="/configuracion"
+          element={<ConfiguracionPage />}
+        />
+
+        <Route
+          path="/configuracion-anterior"
           element={
             <ModulePlaceholderPage
               title="Configuración"

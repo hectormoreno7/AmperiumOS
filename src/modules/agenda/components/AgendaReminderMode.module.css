@@ -1,0 +1,121 @@
+.modePicker {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.modePicker button {
+  display: grid;
+  gap: 4px;
+  padding: 13px 15px;
+  border: 1px solid #b7bdc4;
+  border-radius: 11px;
+  background: #fff;
+  color: #4b5158;
+  text-align: left;
+  cursor: pointer;
+}
+
+.modePicker button strong {
+  font-size: 14px;
+}
+
+.modePicker button span {
+  font-size: 11px;
+}
+
+.modePicker .activeMode {
+  border-color: #d4a017;
+  background: #202327;
+  color: #fff;
+  box-shadow: inset 0 0 0 1px #d4a017;
+}
+
+.modePicker .activeMode strong {
+  color: #efc356;
+}
+
+.quickReminder {
+  display: none;
+  gap: 10px;
+  padding: 15px;
+  border: 1px solid #d7bd74;
+  border-radius: 12px;
+  background: #fff8e6;
+}
+
+.reminderForm {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.reminderForm > label:first-child {
+  grid-column: 1 / -1;
+}
+
+.reminderForm > label:nth-child(2) {
+  display: none;
+}
+
+.reminderForm > label:last-child {
+  display: none;
+}
+
+.reminderForm > label:nth-child(3) input,
+.reminderForm > label:nth-child(4) input {
+  min-height: 66px;
+  font-size: 22px;
+  font-weight: 850;
+  text-align: center;
+}
+
+.reminderForm > label:nth-child(4) input {
+  color: #9c7300;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.quickReminder > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.quickReminder button {
+  border: 1px solid #d4a017;
+  border-radius: 999px;
+  padding: 9px 13px;
+  background: #fff;
+  color: #55420e;
+  font-size: 12px;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.quickReminder button:hover {
+  background: #202327;
+  color: #efc356;
+}
+
+.quickReminder small {
+  color: #716540;
+}
+
+.reminderSummary {
+  padding: 12px 14px;
+  border-left: 4px solid #d4a017;
+  border-radius: 8px;
+  background: #fff;
+  color: #454b52;
+  font-size: 13px;
+}
+
+@media (max-width: 650px) {
+  .modePicker {
+    grid-template-columns: 1fr;
+  }
+
+  .reminderForm {
+    grid-template-columns: 1fr;
+  }
+}

@@ -4,6 +4,7 @@ import {
   useState,
 } from 'react'
 import branding from '../../../shared/constants/branding'
+import useCompanyConfiguration from '../../configuracion/hooks/useCompanyConfiguration'
 import styles from './ClientFormModal.module.css'
 
 const emptyClient = {
@@ -26,6 +27,8 @@ function ClientFormModal({
   onClose,
   onSave,
 }) {
+  const companyConfiguration =
+    useCompanyConfiguration()
   const [formData, setFormData] =
     useState(emptyClient)
 
@@ -45,7 +48,9 @@ function ClientFormModal({
         phones:
           client.phones?.length > 0
             ? client.phones
-            : [''],
+            : client.phone
+              ? [client.phone]
+              : [''],
         email: client.email ?? '',
         address: client.address ?? '',
         notes: client.notes ?? '',
@@ -277,6 +282,7 @@ function ClientFormModal({
           <div className={styles.brandArea}>
             <img
               src={
+                companyConfiguration.logoUrl ||
                 branding.logos
                   .horizontalSimpleDarkBackground
               }

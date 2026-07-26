@@ -18,13 +18,19 @@ import QuotationFormModal from '../components/QuotationFormModal'
 
 import {
   addQuotationPayment,
+  acceptQuotation,
   createQuotation,
   finalizeQuotation,
+  rejectQuotation,
   removeQuotation,
   removeQuotationPayment,
   subscribeToQuotations,
   updateQuotation,
 } from '../services/cotizacionesService'
+
+import {
+  finalizeService,
+} from '../../servicios/services/serviciosService'
 
 import {
   generateQuotationPdf,
@@ -101,6 +107,17 @@ const financialLabel = (status) => {
   return 'Pendiente de pago'
 }
 
+const quotationStatusLabel = (status) => {
+  const labels = {
+    borrador: 'Borrador',
+    enviada: 'Enviada',
+    aceptada: 'Aceptada',
+    rechazada: 'Rechazada',
+  }
+
+  return labels[status] || status
+}
+
 const EMPTY_PAYMENT = {
   amount: '',
   method: 'transferencia',
@@ -163,15 +180,8 @@ function CotizacionesPage() {
   const [search, setSearch] =
     useState('')
 
-  const [
-    statusFilter,
-    setStatusFilter,
-  ] = useState('all')
-
-  const [
-    financialFilter,
-    setFinancialFilter,
-  ] = useState('all')
+  const [view, setView] =
+    useState('active')
 
   const [
     modalOpen,
@@ -370,15 +380,21 @@ function CotizacionesPage() {
 
       return quotations.filter(
         (quotation) => {
-          const matchesStatus =
-            statusFilter === 'all' ||
-            quotation.status ===
-              statusFilter
+          const isArchived =
+            quotation.archived ||
+            (
+              !quotation.linkedServiceId &&
+              quotation.financialStatus ===
+                'liquidada'
+            )
 
-          const matchesFinancial =
-            financialFilter === 'all' ||
-            quotation.financialStatus ===
-              financialFilter
+          if (
+            view === 'history'
+              ? !isArchived
+              : isArchived
+          ) {
+            return false
+          }
 
           const searchable = normalize(
             [
@@ -391,20 +407,15 @@ function CotizacionesPage() {
           )
 
           return (
-            matchesStatus &&
-            matchesFinancial &&
-            (
-              !query ||
-              searchable.includes(query)
-            )
+            !query ||
+            searchable.includes(query)
           )
         },
       )
     }, [
       quotations,
       search,
-      statusFilter,
-      financialFilter,
+      view,
     ])
 
   const summary = useMemo(
@@ -679,6 +690,17 @@ function CotizacionesPage() {
   const handleDelete = async (
     quotation,
   ) => {
+    if (
+      quotation.status ===
+        'aceptada' ||
+      quotation.linkedServiceId
+    ) {
+      setError(
+        'Una cotización aceptada forma parte del historial y no se puede eliminar.',
+      )
+      return
+    }
+
     const label =
       quotation.folio ||
       quotation.projectName ||
@@ -717,6 +739,125 @@ function CotizacionesPage() {
 
       setError(
         'No fue posible generar el PDF.',
+      )
+    }
+  }
+
+  const handleCreateService = async (
+    quotation,
+  ) => {
+    if (quotation.linkedServiceId) {
+      window.location.assign(
+        `/servicios?open=${encodeURIComponent(
+          quotation.linkedServiceId,
+        )}`,
+      )
+      return
+    }
+
+    const confirmed = window.confirm(
+      `¿Confirmas que ${quotation.folio} fue aceptada y deseas generar el servicio?`,
+    )
+
+    if (!confirmed) {
+      return
+    }
+
+    setSaving(true)
+    setError('')
+
+    try {
+      const itemDescription =
+        quotation.items
+          ?.map(
+            (item) =>
+              `${item.quantity} ${item.unit} · ${item.description}`,
+          )
+          .join('\n') || ''
+
+      const service =
+        await finalizeService('', {
+          originType: 'cotizacion',
+          originQuotationId:
+            quotation.id,
+          originQuotationFolio:
+            quotation.folio,
+          quotedTotal:
+            quotation.totals?.total ||
+            0,
+          paidAmount:
+            quotation.paidAmount || 0,
+          pendingAmount:
+            quotation.pendingAmount ||
+            0,
+          financialStatus:
+            quotation.financialStatus ||
+            'pendiente',
+          clientId:
+            quotation.clientId,
+          clientName:
+            quotation.clientName,
+          contactName:
+            quotation.contactName,
+          phone: quotation.phone,
+          email: quotation.email,
+          title:
+            quotation.projectName ||
+            `Servicio de ${quotation.folio}`,
+          description:
+            quotation.summary ||
+            itemDescription ||
+            'Servicio originado desde cotización.',
+          address:
+            quotation.address,
+          observations:
+            itemDescription,
+          internalNotes:
+            `Vinculado a ${quotation.folio}`,
+          priority: 'normal',
+          status: 'programado',
+        })
+
+      await acceptQuotation(
+        quotation.id,
+        service,
+      )
+
+      window.location.assign(
+        `/servicios?open=${encodeURIComponent(
+          service.id,
+        )}`,
+      )
+    } catch (serviceError) {
+      console.error(serviceError)
+      setError(
+        serviceError?.message ||
+          'No fue posible generar el servicio.',
+      )
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleRejectQuotation = async (
+    quotation,
+  ) => {
+    const confirmed = window.confirm(
+      `¿Marcar ${quotation.folio} como rechazada?`,
+    )
+
+    if (!confirmed) {
+      return
+    }
+
+    try {
+      await rejectQuotation(
+        quotation.id,
+      )
+    } catch (quotationError) {
+      setError(
+        quotationError?.message ||
+          'No fue posible rechazar la cotización.',
       )
     }
   }
@@ -787,6 +928,45 @@ function CotizacionesPage() {
     }
   }
 
+  const handleLiquidate = async (
+    quotation,
+  ) => {
+    const pending = Number(
+      quotation.pendingAmount || 0,
+    )
+
+    if (pending <= 0) {
+      return
+    }
+
+    const confirmed = window.confirm(
+      `¿Registrar ${money(pending)} y marcar ${quotation.folio} como liquidada?`,
+    )
+
+    if (!confirmed) {
+      return
+    }
+
+    try {
+      await addQuotationPayment(
+        quotation.id,
+        {
+          amount: pending,
+          method: 'liquidación directa',
+          date: new Date()
+            .toISOString()
+            .slice(0, 10),
+          note: 'Liquidación total',
+        },
+      )
+    } catch (paymentError) {
+      setError(
+        paymentError?.message ||
+          'No fue posible liquidar la cotización.',
+      )
+    }
+  }
+
   const handleRemovePayment = async (
     payment,
   ) => {
@@ -828,24 +1008,6 @@ function CotizacionesPage() {
 
   return (
     <main className={styles.page}>
-      <header className={styles.pageHeader}>
-        <div className={styles.brandMark}>
-          A
-        </div>
-
-        <div>
-          <span className={styles.eyebrow}>
-            AMPERIUM
-          </span>
-
-          <h1>Cotizaciones</h1>
-
-          <p>
-            Control comercial y financiero de cada propuesta.
-          </p>
-        </div>
-      </header>
-
       <section className={styles.summaryGrid}>
         <article>
           <span>Total cotizado</span>
@@ -884,67 +1046,36 @@ function CotizacionesPage() {
           placeholder="Buscar cliente, proyecto o folio"
         />
 
-        <div className={styles.filters}>
-          {[
-            ['all', 'Todas'],
-            ['borrador', 'Borradores'],
-            ['enviada', 'Enviadas'],
-          ].map(([value, label]) => (
-            <button
-              type="button"
-              key={value}
-              onClick={() =>
-                setStatusFilter(value)
-              }
-              className={
-                statusFilter === value
-                  ? styles.filterActive
-                  : ''
-              }
-            >
-              {label}
-            </button>
-          ))}
+        <div className={styles.viewSwitch}>
+          <button
+            type="button"
+            className={
+              view === 'active'
+                ? styles.viewActive
+                : ''
+            }
+            onClick={() =>
+              setView('active')
+            }
+          >
+            Activas
+          </button>
+
+          <button
+            type="button"
+            className={
+              view === 'history'
+                ? styles.viewActive
+                : ''
+            }
+            onClick={() =>
+              setView('history')
+            }
+          >
+            Historial
+          </button>
         </div>
 
-        <div className={styles.filters}>
-          {[
-            [
-              'all',
-              'Todos los cobros',
-            ],
-            [
-              'pendiente',
-              'Pendientes',
-            ],
-            [
-              'anticipo',
-              'Con anticipo',
-            ],
-            [
-              'liquidada',
-              'Liquidadas',
-            ],
-          ].map(([value, label]) => (
-            <button
-              type="button"
-              key={value}
-              onClick={() =>
-                setFinancialFilter(
-                  value,
-                )
-              }
-              className={
-                financialFilter ===
-                value
-                  ? styles.filterActive
-                  : ''
-              }
-            >
-              {label}
-            </button>
-          ))}
-        </div>
       </section>
 
       {error ? (
@@ -970,7 +1101,11 @@ function CotizacionesPage() {
           <strong>
             {loading
               ? 'Cargando...'
-              : `${filteredQuotations.length} cotizaciones`}
+              : `${filteredQuotations.length} ${
+                  view === 'history'
+                    ? 'en historial'
+                    : 'activas'
+                }`}
           </strong>
 
           <span>
@@ -1094,10 +1229,9 @@ function CotizacionesPage() {
                               ] || ''
                             }`}
                           >
-                            {quotation.status ===
-                            'enviada'
-                              ? 'Enviada'
-                              : 'Borrador'}
+                            {quotationStatusLabel(
+                              quotation.status,
+                            )}
                           </span>
                         </div>
 
@@ -1224,16 +1358,21 @@ function CotizacionesPage() {
                         styles.cardActions
                       }
                     >
-                      <button
-                        type="button"
-                        onClick={() =>
-                          openEdit(
-                            quotation,
-                          )
-                        }
-                      >
-                        Editar
-                      </button>
+                      {quotation.status ===
+                        'borrador' ||
+                      quotation.status ===
+                        'enviada' ? (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            openEdit(
+                              quotation,
+                            )
+                          }
+                        >
+                          Editar
+                        </button>
+                      ) : null}
 
                       {quotation.folio ? (
                         <button
@@ -1248,33 +1387,98 @@ function CotizacionesPage() {
                         </button>
                       ) : null}
 
-                      <button
-                        type="button"
-                        className={
-                          styles.paymentButton
-                        }
-                        onClick={() =>
-                          openPayments(
-                            quotation,
-                          )
-                        }
-                      >
-                        Cobros
-                      </button>
+                      {quotation.status ===
+                        'enviada' ||
+                      quotation.status ===
+                        'aceptada' ? (
+                        <button
+                          type="button"
+                          className={
+                            styles.serviceButton
+                          }
+                          onClick={() =>
+                            handleCreateService(
+                              quotation,
+                            )
+                          }
+                        >
+                          {quotation.linkedServiceId
+                            ? 'Abrir servicio'
+                            : 'Aceptar y generar servicio'}
+                        </button>
+                      ) : null}
 
-                      <button
-                        type="button"
-                        className={
-                          styles.deleteButton
-                        }
-                        onClick={() =>
-                          handleDelete(
-                            quotation,
-                          )
-                        }
-                      >
-                        Eliminar
-                      </button>
+                      {quotation.status ===
+                      'enviada' ? (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleRejectQuotation(
+                              quotation,
+                            )
+                          }
+                        >
+                          Rechazar
+                        </button>
+                      ) : null}
+
+                      {quotation.status !==
+                        'borrador' &&
+                      quotation.status !==
+                        'rechazada' ? (
+                        <button
+                          type="button"
+                          className={
+                            styles.paymentButton
+                          }
+                          onClick={() =>
+                            openPayments(
+                              quotation,
+                            )
+                          }
+                        >
+                          Abonos
+                        </button>
+                      ) : null}
+
+                      {quotation.pendingAmount >
+                        0 &&
+                      quotation.status !==
+                        'borrador' &&
+                      quotation.status !==
+                        'rechazada' ? (
+                        <button
+                          type="button"
+                          className={
+                            styles.liquidateButton
+                          }
+                          onClick={() =>
+                            handleLiquidate(
+                              quotation,
+                            )
+                          }
+                        >
+                          Liquidar
+                        </button>
+                      ) : null}
+
+                      {quotation.status !==
+                        'aceptada' &&
+                      !quotation.linkedServiceId ? (
+                        <button
+                          type="button"
+                          className={
+                            styles.deleteButton
+                          }
+                          onClick={() =>
+                            handleDelete(
+                              quotation,
+                            )
+                          }
+                        >
+                          Eliminar
+                        </button>
+                      ) : null}
                     </div>
                   </article>
                 )

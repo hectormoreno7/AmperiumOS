@@ -460,3 +460,65 @@
     width: 100%;
   }
 }
+
+.viewSwitch {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid #b6bcc3;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.viewSwitch button {
+  border: 0;
+  border-radius: 7px;
+  padding: 8px 12px;
+  background: transparent;
+  color: #555c64;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.viewSwitch .viewActive {
+  background: #202327;
+  color: #fff;
+}
+
+.cardActions .finalizeButton {
+  border-color: #2e6e48;
+  background: #2e6e48;
+  color: #fff;
+}
+
+.cardActions .liquidateButton {
+  border-color: #2e6e48;
+  background: #e8f7ec;
+  color: #205f39;
+}
+
+.financePanel {
+  display: grid;
+  gap: 9px;
+  padding: 12px;
+  border: 1px solid #c9ced4;
+  border-radius: 11px;
+  background: #f7f8f9;
+  color: #5a6068;
+  font-size: 12px;
+}
+
+.financePanel > div {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 9px;
+}
+
+.financePanel > div span {
+  display: grid;
+  gap: 3px;
+}
+
+.financePanel strong {
+  color: #202327;
+}

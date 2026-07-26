@@ -97,7 +97,8 @@
 }
 
 .actionButton,
-.editButton {
+.editButton,
+.deleteButton {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -150,6 +151,17 @@
     border-color: #c69816;
 }
 
+.deleteButton {
+    border: 1px solid #804747;
+    background: #352326;
+    color: #f2b5b5;
+}
+
+.deleteButton:hover {
+    border-color: #b85d5d;
+    background: #492b2e;
+}
+
 @media (max-width: 820px) {
     .header {
         align-items: flex-start;
@@ -169,7 +181,8 @@
     }
 
     .actionButton,
-    .editButton {
+    .editButton,
+    .deleteButton {
         width: 100%;
     }
 }

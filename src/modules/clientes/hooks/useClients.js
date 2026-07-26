@@ -75,6 +75,8 @@ function getClientName(client) {
 
 function getClientPhone(client) {
     return (
+        client?.phones?.find(Boolean) ||
+        client?.telefonos?.find(Boolean) ||
         client?.phone ||
         client?.telefono ||
         client?.telefonoPrincipal ||
@@ -434,6 +436,8 @@ export default function useClients() {
                         clientName,
 
                     phone:
+                        clientData?.phones?.find(Boolean) ||
+                        clientData?.telefonos?.find(Boolean) ||
                         clientData?.phone ||
                         clientData?.telefono ||
                         "",
@@ -559,7 +563,7 @@ export default function useClients() {
                 };
             }
         },
-        [editingClient?.id, selectedClient?.id]
+        [editingClient, selectedClient]
     );
 
     const changeClientStatus = useCallback(

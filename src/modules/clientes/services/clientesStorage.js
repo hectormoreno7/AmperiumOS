@@ -65,6 +65,21 @@ const normalizeClientDocument = (
 ) => {
   const data = documentSnapshot.data()
 
+  const phones = normalizePhones(
+    data.phones,
+  )
+  const legacyPhone = normalizeText(
+    data.phone ||
+      data.telefono ||
+      data.telefonoPrincipal,
+  )
+  const normalizedPhones =
+    phones.length > 0
+      ? phones
+      : legacyPhone
+        ? [legacyPhone]
+        : []
+
   return {
     id: documentSnapshot.id,
 
@@ -72,7 +87,8 @@ const normalizeClientDocument = (
     contactName: normalizeText(
       data.contactName,
     ),
-    phones: normalizePhones(data.phones),
+    phones: normalizedPhones,
+    phone: normalizedPhones[0] || '',
     email: normalizeText(data.email),
     address: normalizeText(data.address),
     notes: normalizeText(data.notes),
@@ -92,14 +108,31 @@ const normalizeClientDocument = (
   }
 }
 
-const prepareClientData = (clientData) => ({
+const prepareClientData = (clientData) => {
+  const phones = normalizePhones(
+    clientData.phones,
+  )
+  const legacyPhone = normalizeText(
+    clientData.phone ||
+      clientData.telefono,
+  )
+  const normalizedPhones =
+    phones.length > 0
+      ? phones
+      : legacyPhone
+        ? [legacyPhone]
+        : []
+
+  return {
   name: normalizeText(clientData.name),
 
   contactName: normalizeText(
     clientData.contactName,
   ),
 
-  phones: normalizePhones(clientData.phones),
+  phones: normalizedPhones,
+
+  phone: normalizedPhones[0] || '',
 
   email: normalizeText(clientData.email),
 
@@ -108,7 +141,8 @@ const prepareClientData = (clientData) => ({
   notes: normalizeText(clientData.notes),
 
   status: normalizeStatus(clientData.status),
-})
+  }
+}
 
 export const subscribeToClients = (
   onClientsChange,

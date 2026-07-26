@@ -12,6 +12,13 @@ export default function ClientInfo({ client }) {
 
     if (!client) return null;
 
+    const phone =
+        client?.phones?.find(Boolean) ||
+        client?.telefonos?.find(Boolean) ||
+        client?.phone ||
+        client?.telefono ||
+        "";
+
     const copy = (text) => {
 
         if (!text) return;
@@ -22,12 +29,12 @@ export default function ClientInfo({ client }) {
 
     const openWhatsApp = () => {
 
-        if (!client.phone) return;
+        if (!phone) return;
 
-        const phone = client.phone.replace(/\D/g, "");
+        const cleanPhone = phone.replace(/\D/g, "");
 
         window.open(
-            `https://wa.me/52${phone}`,
+            `https://wa.me/${cleanPhone.startsWith("52") ? cleanPhone : `52${cleanPhone}`}`,
             "_blank"
         );
 
@@ -35,9 +42,9 @@ export default function ClientInfo({ client }) {
 
     const call = () => {
 
-        if (!client.phone) return;
+        if (!phone) return;
 
-        window.location.href = `tel:${client.phone}`;
+        window.location.href = `tel:${phone.replace(/[^\d+]/g, "")}`;
 
     };
 
@@ -81,11 +88,11 @@ export default function ClientInfo({ client }) {
 
                 <div className={styles.value}>
 
-                    <span>{client.phone || "-"}</span>
+                    <span>{phone || "-"}</span>
 
                     {
 
-                        client.phone &&
+                        phone &&
 
                         <div className={styles.actions}>
 
@@ -101,7 +108,7 @@ export default function ClientInfo({ client }) {
 
                             </button>
 
-                            <button onClick={()=>copy(client.phone)}>
+                            <button onClick={()=>copy(phone)}>
 
                                 <Copy size={16}/>
 

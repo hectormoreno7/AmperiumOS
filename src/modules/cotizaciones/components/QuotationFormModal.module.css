@@ -1,1 +1,80 @@
 .overlay{position:fixed;inset:0;z-index:100;background:rgba(15,17,20,.72);display:grid;place-items:center;padding:18px}.modal{width:min(1500px,100%);max-height:95vh;border:1px solid #6c7077;border-radius:18px;background:#eef0f2;overflow:hidden;box-shadow:0 24px 70px rgba(0,0,0,.38)}.header{min-height:84px;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;background:#fff;border-bottom:3px solid #d4a017}.headerBrand{display:flex;align-items:center;gap:13px}.headerSymbol{width:48px;height:48px;border:2px solid #d4a017;border-radius:14px;display:grid;place-items:center;background:#202327;color:#d4a017;font-size:25px;font-weight:950}.header span{display:block;color:#8a6508;font-size:11px;font-weight:950;letter-spacing:.15em}.header h2{margin:2px 0 0;color:#1b1d21;font-size:24px}.header>button{width:40px;height:40px;border:1px solid #b7bcc2;border-radius:50%;background:#f7f8f9;color:#25282c;font-size:24px;cursor:pointer}.form{max-height:calc(95vh - 84px);overflow:auto;padding:18px;display:grid;gap:15px}.section{padding:17px;border:1px solid #b4bac1;border-radius:14px;background:#fff}.section h3{margin:0 0 14px;color:#202327;font-size:16px}.sectionTitleRow{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.sectionTitleRow h3{margin-bottom:4px}.sectionTitleRow p{margin:0;color:#646a72;font-size:12px}.gridTwo,.gridThree,.gridFour{display:grid;gap:12px}.gridTwo{grid-template-columns:repeat(2,minmax(0,1fr))}.gridThree{grid-template-columns:repeat(3,minmax(0,1fr));margin-top:12px}.gridFour{grid-template-columns:repeat(4,minmax(0,1fr))}.section label{display:grid;gap:7px;color:#393e45;font-size:12px;font-weight:850}.section input,.section select,.section textarea{width:100%;border:1px solid #aeb4bc;border-radius:9px;background:#fff;padding:10px 11px;color:#202327;font:inherit;outline:none}.section input:focus,.section select:focus,.section textarea:focus{border-color:#d4a017;box-shadow:0 0 0 3px rgba(212,160,23,.14)}.section textarea{resize:vertical}.itemsHeader,.itemRow{display:grid;grid-template-columns:70px 90px 130px minmax(250px,1.5fr) 105px 105px 115px 115px 38px;gap:8px;align-items:center}.itemsHeader{padding:9px;color:#646a72;font-size:10px;font-weight:900;text-transform:uppercase}.itemsList{display:grid;gap:8px}.itemRow{padding:9px;border:1px solid #c3c8ce;border-radius:11px;background:#f5f6f7}.itemRow strong{font-size:12px;text-align:right;color:#202327}.percentInput{position:relative}.percentInput input{padding-right:27px}.percentInput span{position:absolute;right:9px;top:50%;transform:translateY(-50%);color:#747a82;font-size:12px}.secondaryButton,.fileButton{border:1px solid #aeb4bc;border-radius:9px;background:#fff;padding:9px 12px;color:#25282c;font-weight:850;cursor:pointer}.removeButton{width:34px;height:34px;border:1px solid #d6aaaa;border-radius:50%;background:#fff;color:#922b2b;font-size:20px;cursor:pointer}.taxToggle{display:flex!important;grid-template-columns:auto 1fr!important;align-items:flex-start;margin:15px 0;padding:12px;border:1px solid #d6c27f;border-radius:10px;background:#fff8df}.taxToggle input{width:auto;margin-top:2px}.imageArea{display:flex;align-items:center;gap:16px;flex-wrap:wrap}.imageArea img,.imageArea>div:first-child{width:240px;height:150px;border:1px solid #c1c6cc;border-radius:11px;object-fit:cover;background:#f3f4f5;display:grid;place-items:center;color:#777}.imageArea>div:last-child{display:flex;gap:8px;flex-wrap:wrap}.fileButton input{display:none}.summaryBox{margin-left:auto;width:min(430px,100%);padding:15px;border:1px solid #9ea4ab;border-radius:14px;background:#202327;color:#fff}.summaryBox>div{display:flex;justify-content:space-between;gap:18px;padding:6px 0}.summaryBox span{color:#d8dadd;font-size:12px}.summaryBox strong{font-size:14px}.summaryBox .totalRow{margin:5px 0;padding:10px 0;border-top:1px solid #6c7077;border-bottom:1px solid #6c7077}.summaryBox .totalRow span,.summaryBox .totalRow strong{color:#efc45c;font-size:18px}.error{padding:12px;border-radius:9px;background:#f8dddd;color:#8a2727;font-weight:800}.actions{position:sticky;bottom:-18px;margin:0 -18px -18px;padding:14px 18px;display:flex;justify-content:flex-end;gap:9px;border-top:1px solid #b9bec4;background:#f7f8f9}.actions button{min-height:42px;border:1px solid #aeb4bc;border-radius:9px;background:#fff;padding:0 15px;font-weight:850;cursor:pointer}.actions .draftButton{border-color:#d4a017;color:#735500}.actions .primaryButton{border-color:#d4a017;background:#202327;color:#efc45c}.actions button:disabled{opacity:.6;cursor:not-allowed}@media(max-width:1150px){.itemsHeader{display:none}.itemRow{grid-template-columns:repeat(2,minmax(0,1fr))}.itemRow textarea{grid-column:1/-1}.itemRow .removeButton{justify-self:end}.gridFour{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:720px){.overlay{padding:0}.modal{max-height:100vh;height:100vh;border-radius:0}.header{min-height:72px}.header h2{font-size:19px}.headerSymbol{width:42px;height:42px}.form{max-height:calc(100vh - 72px);padding:11px}.section{padding:13px}.gridTwo,.gridThree,.gridFour,.itemRow{grid-template-columns:1fr}.sectionTitleRow{align-items:stretch;flex-direction:column}.itemRow strong{text-align:left}.actions{bottom:-11px;margin:0 -11px -11px;display:grid;grid-template-columns:1fr}.summaryBox{width:100%}}
+/* Encabezado compartido con los formularios de Clientes y Servicios. */
+.modal .header {
+  min-height: 122px;
+  padding: 20px 22px;
+  gap: 20px;
+  border-bottom: 1px solid #555b62;
+  background: linear-gradient(135deg, #26292e 0%, #17191d 65%, #101114 100%);
+}
+
+.header .headerBrand {
+  min-width: 0;
+  gap: 20px;
+}
+
+.brandLogo {
+  width: 190px;
+  max-width: 36%;
+  max-height: 66px;
+  flex-shrink: 0;
+  object-fit: contain;
+  object-position: left center;
+}
+
+.headerText {
+  min-width: 0;
+  padding-left: 20px;
+  border-left: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.modal .header h2 {
+  margin: 5px 0;
+  color: #fff;
+}
+
+.modal .header p {
+  margin: 0;
+  color: #c5c9cf;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.modal .header > button {
+  flex-shrink: 0;
+  border-color: #626871;
+  border-radius: 11px;
+  background: #30343a;
+  color: #fff;
+}
+
+/* Mantiene siempre visibles y completos los botones inferiores. */
+.modal {
+  display: flex;
+  flex-direction: column;
+}
+
+.modal .form {
+  min-height: 0;
+  max-height: calc(95vh - 122px);
+  flex: 1;
+  padding-bottom: 0;
+}
+
+.modal .actions {
+  bottom: 0;
+  margin: 0 -18px;
+  padding: 14px 18px max(14px, env(safe-area-inset-bottom));
+  flex-shrink: 0;
+  box-shadow: 0 -5px 14px rgba(20, 24, 31, 0.1);
+}
+
+@media (max-width: 720px) {
+  .modal .form {
+    max-height: calc(100dvh - 122px);
+  }
+
+  .modal .actions {
+    margin: 0 -11px;
+  }
+}

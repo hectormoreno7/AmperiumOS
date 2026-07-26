@@ -40,6 +40,14 @@ const modules = [
     enabled: true,
   },
   {
+    id: 'historial',
+    label: 'Historial',
+    path: '/historial',
+    icon: '◫',
+    description: 'Registros finalizados y liquidados.',
+    enabled: true,
+  },
+  {
     id: 'agenda',
     label: 'Agenda',
     path: '/agenda',
