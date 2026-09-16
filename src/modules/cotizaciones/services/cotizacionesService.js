@@ -31,6 +31,12 @@ const normalizePayment = (payment, index = 0) => ({
   method: normalizeText(payment?.method) || 'transferencia',
   date: normalizeText(payment?.date) || new Date().toISOString().slice(0, 10),
   note: normalizeText(payment?.note),
+  cashAmount: roundMoney(Math.max(0, normalizeNumber(payment?.cashAmount))),
+  cardAmount: roundMoney(Math.max(0, normalizeNumber(payment?.cardAmount))),
+  cardCommissionRate: roundMoney(Math.max(0, normalizeNumber(payment?.cardCommissionRate))),
+  cardCommissionAmount: roundMoney(Math.max(0, normalizeNumber(payment?.cardCommissionAmount))),
+  chargedAmount: roundMoney(Math.max(0, normalizeNumber(payment?.chargedAmount || payment?.amount))),
+  installments: Math.max(0, Math.floor(normalizeNumber(payment?.installments))),
   createdAt: normalizeText(payment?.createdAt) || new Date().toISOString(),
 })
 
@@ -65,21 +71,20 @@ export const calculateQuotationItem = (rawItem, taxEnabled = false) => {
   const profitRate = Math.max(0, normalizeNumber(rawItem.profitRate))
   const conceptType = rawItem.conceptType === 'service' ? 'service' : 'product'
 
-  let baseCost = enteredCost
-  let netSalePrice = 0
-  let taxAmount = 0
-  let finalUnitPrice = 0
-
-  if (conceptType === 'product') {
-    baseCost = roundMoney(enteredCost / (1 + TAX_RATE))
-    netSalePrice = roundMoney(baseCost * (1 + profitRate / 100))
-    taxAmount = roundMoney(netSalePrice * TAX_RATE)
-    finalUnitPrice = roundMoney(netSalePrice + taxAmount)
-  } else {
-    netSalePrice = roundMoney(enteredCost * (1 + profitRate / 100))
-    taxAmount = taxEnabled ? roundMoney(netSalePrice * TAX_RATE) : 0
-    finalUnitPrice = roundMoney(netSalePrice + taxAmount)
-  }
+  const baseCost =
+    conceptType === 'product'
+      ? roundMoney(enteredCost / (1 + TAX_RATE))
+      : enteredCost
+  const netSalePrice = roundMoney(
+    baseCost * (1 + profitRate / 100),
+  )
+  const taxAmount =
+    conceptType === 'product' || taxEnabled
+      ? roundMoney(netSalePrice * TAX_RATE)
+      : 0
+  const finalUnitPrice = roundMoney(
+    netSalePrice + taxAmount,
+  )
 
   return {
     quantity,
@@ -115,6 +120,8 @@ const normalizeItems = (items, taxEnabled = false) => {
         netSalePrice: calculation.netSalePrice,
         taxAmount: calculation.taxAmount,
         unitPrice: calculation.finalUnitPrice,
+        image: normalizeText(item.image),
+        imageName: normalizeText(item.imageName),
       }
     })
     .filter((item) => item.description)
@@ -479,6 +486,12 @@ export const addQuotationPayment = async (quotationId, payment) => {
       method: payment.method,
       date: payment.date || new Date().toISOString().slice(0, 10),
       note: payment.note,
+      cashAmount: payment.cashAmount,
+      cardAmount: payment.cardAmount,
+      cardCommissionRate: payment.cardCommissionRate,
+      cardCommissionAmount: payment.cardCommissionAmount,
+      chargedAmount: payment.chargedAmount,
+      installments: payment.installments,
       createdAt: new Date().toISOString(),
     })
 

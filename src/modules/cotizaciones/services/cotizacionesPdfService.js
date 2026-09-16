@@ -482,30 +482,25 @@ const addClientProject = (
       quotation.projectLocation ||
         quotation.location,
     ],
-    [
-      'DESCRIPCIÓN:',
-      quotation.summary ||
-        quotation.description,
-    ],
   ]
 
-  let y = 71
+  let clientY = 71
 
   clientRows.forEach(([label, value]) => {
-    labelValue(
+    const lines = labelValue(
       doc,
       label,
       value,
       PAGE.left,
       41,
-      y,
+      clientY,
       61,
     )
 
-    y += 5.3
+    clientY += Math.max(1, lines) * 5.3
   })
 
-  y = 71
+  let projectY = 71
 
   projectRows.forEach(([label, value]) => {
     const lines = labelValue(
@@ -514,13 +509,58 @@ const addClientProject = (
       value,
       111,
       141,
-      y,
+      projectY,
       62,
     )
 
-    y += Math.max(1, lines) * 5.3
+    projectY += Math.max(1, lines) * 5.3
   })
+
+  const descriptionY = Math.max(clientY, projectY) + 3
+  const description = doc.splitTextToSize(
+    quotation.summary || quotation.description || '',
+    PAGE.contentWidth,
+  )
+
+  if (!description.length) {
+    return descriptionY + 3
+  }
+
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(7.4)
+  doc.setTextColor(...GRAPHITE)
+  doc.text('DESCRIPCIÓN:', PAGE.left, descriptionY)
+  doc.setFont('helvetica', 'normal')
+  doc.text(description, PAGE.left, descriptionY + 5)
+
+  return descriptionY + 5 + description.length * 3.7 + 4
 }
+
+const getCommercialConditions = (quotation) => [
+  ['FORMA DE PAGO:', quotation.paymentMethod || 'Transferencia'],
+  [
+    'ANTICIPO:',
+    `${quotation.advanceRate || 0}% (${money(
+      quotation.totals?.advanceAmount,
+    )})`,
+  ],
+  ['RESTANTE:', quotation.remainingTerms || 'Contra entrega'],
+  ['ENTREGA:', quotation.deliveryTime || 'Por definir'],
+  ['GARANTÍA:', quotation.warranty || 'Según equipo e instalación'],
+  ['VALIDEZ:', '10 días naturales'],
+  ['MONEDA:', 'Pesos Mexicanos MXN'],
+]
+
+const getCommercialConditionsHeight = (doc, quotation) =>
+  10 + getCommercialConditions(quotation).reduce(
+    (height, [, value]) =>
+      height +
+      Math.max(
+        1,
+        doc.splitTextToSize(String(value || ''), 61).length,
+      ) * 5.1,
+    0,
+  )
 
 const addCommercialConditions = (
   doc,
@@ -537,47 +577,10 @@ const addCommercialConditions = (
     y,
   )
 
-  const conditions = [
-    [
-      'FORMA DE PAGO:',
-      quotation.paymentMethod ||
-        'Transferencia',
-    ],
-    [
-      'ANTICIPO:',
-      `${quotation.advanceRate || 0}% (${money(
-        quotation.totals?.advanceAmount,
-      )})`,
-    ],
-    [
-      'RESTANTE:',
-      quotation.remainingTerms ||
-        'Contra entrega',
-    ],
-    [
-      'ENTREGA:',
-      quotation.deliveryTime ||
-        'Por definir',
-    ],
-    [
-      'GARANTÍA:',
-      quotation.warranty ||
-        'Según equipo e instalación',
-    ],
-    [
-      'VALIDEZ:',
-      '10 días naturales',
-    ],
-    [
-      'MONEDA:',
-      'Pesos Mexicanos MXN',
-    ],
-  ]
-
   let rowY = y + 7
 
-  conditions.forEach(([label, value]) => {
-    labelValue(
+  getCommercialConditions(quotation).forEach(([label, value]) => {
+    const lines = labelValue(
       doc,
       label,
       value,
@@ -587,8 +590,10 @@ const addCommercialConditions = (
       61,
     )
 
-    rowY += 5.1
+    rowY += Math.max(1, lines) * 5.1
   })
+
+  return rowY
 }
 
 const addTotals = (
@@ -674,6 +679,61 @@ const addTotals = (
       },
     )
   })
+}
+
+const addConceptPhotoAnnex = (
+  doc,
+  quotation,
+  assets,
+) => {
+  const items = (quotation.items || []).filter((item) => item.image)
+  if (!items.length) return
+
+  let y = 61
+  doc.addPage()
+  addPageTwoHeader(doc, quotation, assets)
+
+  items.forEach((item, index) => {
+    const blockHeight = 82
+    if (y + blockHeight > 250) {
+      addFooter(doc)
+      doc.addPage()
+      addPageTwoHeader(doc, quotation, assets)
+      y = 61
+    }
+
+    if (y === 61) {
+      addGoldTitle(doc, 'ANEXO FOTOGRÁFICO DE CONCEPTOS', PAGE.left, y)
+      y += 9
+    }
+
+    doc.setDrawColor(...LIGHT_GRAY)
+    doc.setLineWidth(0.35)
+    doc.roundedRect(PAGE.left, y, PAGE.contentWidth, blockHeight - 5, 2, 2, 'S')
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(8)
+    doc.setTextColor(...GRAPHITE)
+    const description = doc.splitTextToSize(
+      `${index + 1}. ${item.description || 'Concepto'}`,
+      105,
+    )
+    doc.text(description, 94, y + 8)
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(7.2)
+    doc.setTextColor(...MID_GRAY)
+    doc.text(`Cantidad: ${item.quantity || 0} ${item.unit || ''}`, 94, y + 23)
+    doc.text(`Precio unitario: ${money(item.unitPrice)}`, 94, y + 29)
+    try {
+      const properties = doc.getImageProperties(item.image)
+      addImageContained(doc, item.image, properties.fileType || 'JPEG', PAGE.left + 4, y + 4, 74, 67, 'center')
+    } catch {
+      doc.setFontSize(7)
+      doc.text('No fue posible cargar la foto.', PAGE.left + 41, y + 38, { align: 'center' })
+    }
+    y += blockHeight
+  })
+
+  addFooter(doc)
 }
 
 const addPageTwoHeader = (
@@ -1019,13 +1079,13 @@ export const generateQuotationPdf = async (
     assets,
   )
 
-  addClientProject(
+  const tableStartY = addClientProject(
     doc,
     quotation,
   )
 
   autoTable(doc, {
-    startY: 92,
+    startY: Math.max(92, tableStartY),
 
     head: [
       [
@@ -1145,13 +1205,23 @@ export const generateQuotationPdf = async (
     },
   })
 
-  const contentY = Math.min(
-    Math.max(
-      doc.lastAutoTable.finalY + 9,
-      132,
-    ),
-    195,
+  // Las condiciones y los totales acompañan al último concepto cuando hay
+  // espacio. Solo se abre una página adicional si ese bloque completo no cabe.
+  const lastConceptY = doc.lastAutoTable.finalY
+  const conditionsHeight = getCommercialConditionsHeight(
+    doc,
+    quotation,
   )
+  let contentY = lastConceptY + 8
+
+  if (
+    contentY + conditionsHeight >
+    PAGE.footerLineY - 3
+  ) {
+    doc.addPage()
+    addPageTwoHeader(doc, quotation, assets)
+    contentY = 61
+  }
 
   addCommercialConditions(
     doc,
@@ -1165,7 +1235,7 @@ export const generateQuotationPdf = async (
     contentY - 3,
   )
 
-  addFooter(doc)
+  addConceptPhotoAnnex(doc, quotation, assets)
 
   doc.addPage()
 

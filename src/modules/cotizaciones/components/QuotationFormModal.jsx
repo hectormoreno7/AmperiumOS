@@ -35,6 +35,8 @@ const EMPTY_ITEM = () => ({
   conceptType: 'product',
   costPrice: 0,
   profitRate: 35,
+  image: '',
+  imageName: '',
 })
 
 const INITIAL_FORM = {
@@ -161,6 +163,8 @@ function QuotationFormModal({
     processingImage,
     setProcessingImage,
   ] = useState(false)
+
+  const [processingItemImageId, setProcessingItemImageId] = useState('')
 
   useEffect(() => {
     if (!open) {
@@ -336,6 +340,34 @@ function QuotationFormModal({
       setError(imageError.message)
     } finally {
       setProcessingImage(false)
+      event.target.value = ''
+    }
+  }
+
+  const handleItemImage = async (itemId, event) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+    if (!file.type.startsWith('image/')) {
+      setError('Selecciona una imagen válida.')
+      return
+    }
+
+    setProcessingItemImageId(itemId)
+    setError('')
+    try {
+      const image = await compressImage(file)
+      setForm((current) => ({
+        ...current,
+        items: current.items.map((item) =>
+          item.id === itemId
+            ? { ...item, image, imageName: file.name }
+            : item,
+        ),
+      }))
+    } catch (imageError) {
+      setError(imageError.message)
+    } finally {
+      setProcessingItemImageId('')
       event.target.value = ''
     }
   }
@@ -631,15 +663,6 @@ function QuotationFormModal({
                 </p>
               </div>
 
-              <button
-                type="button"
-                className={
-                  styles.secondaryButton
-                }
-                onClick={addItem}
-              >
-                + Agregar concepto
-              </button>
             </div>
 
             <div className={styles.itemsHeader}>
@@ -805,6 +828,40 @@ function QuotationFormModal({
                   </div>
                 )
               })}
+
+              <button
+                type="button"
+                className={styles.addConceptButton}
+                onClick={addItem}
+              >
+                + Agregar concepto
+              </button>
+            </div>
+
+            <div className={styles.itemImages}>
+              <div>
+                <h4>Fotos de conceptos (opcionales)</h4>
+                <p>Se incluirán como anexo en el PDF antes de las firmas.</p>
+              </div>
+
+              {form.items.filter((item) => item.description.trim()).map((item, index) => (
+                <article key={item.id} className={styles.itemImageCard}>
+                  {item.image ? <img src={item.image} alt={item.description} /> : <div>Sin foto</div>}
+                  <div>
+                    <strong>{index + 1}. {item.description}</strong>
+                    <span>{item.imageName || 'Agrega una foto para este concepto.'}</span>
+                    <label className={styles.fileButton}>
+                      {processingItemImageId === item.id ? 'Procesando...' : item.image ? 'Cambiar foto' : 'Agregar foto'}
+                      <input type="file" accept="image/*" onChange={(event) => handleItemImage(item.id, event)} disabled={Boolean(processingItemImageId)} />
+                    </label>
+                    {item.image ? (
+                      <button type="button" className={styles.secondaryButton} onClick={() => updateItem(item.id, 'image', '') || updateItem(item.id, 'imageName', '')}>
+                        Quitar foto
+                      </button>
+                    ) : null}
+                  </div>
+                </article>
+              ))}
             </div>
           </section>
 

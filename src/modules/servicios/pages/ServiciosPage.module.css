@@ -522,3 +522,5 @@
 .financePanel strong {
   color: #202327;
 }
+.cardActions .reminderOn{border-color:#49a768;background:#eaf8ee;color:#226b39}
+.cardActions .reminderOff{border-color:#aeb4bb;background:#f0f2f4;color:#666d74}

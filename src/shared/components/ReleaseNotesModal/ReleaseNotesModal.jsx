@@ -579,7 +579,11 @@ function ReleaseNotesModal() {
         </div>
 
         <div
-          className={styles.content}
+          className={`${styles.content} ${
+            selectedNotification
+              ? styles.detailOpen
+              : ''
+          }`}
         >
           <aside
             className={
@@ -728,6 +732,19 @@ function ReleaseNotesModal() {
                     styles.detailHeader
                   }
                 >
+                  <button
+                    type="button"
+                    className={
+                      styles.detailBack
+                    }
+                    onClick={() =>
+                      setSelectedNotificationId(
+                        null,
+                      )
+                    }
+                  >
+                    ← Volver
+                  </button>
                   <span>
                     Actualización del sistema
                   </span>

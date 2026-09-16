@@ -235,6 +235,9 @@ const normalizeServiceDocument = (
       data.scheduledTime,
     ),
 
+    reminderEnabled:
+      data.reminderEnabled !== false,
+
     estimatedDuration: normalizeText(
       data.estimatedDuration,
     ),
@@ -390,6 +393,9 @@ const prepareServiceData = (
   scheduledTime: normalizeText(
     serviceData.scheduledTime,
   ),
+
+  reminderEnabled:
+    serviceData.reminderEnabled !== false,
 
   estimatedDuration: normalizeText(
     serviceData.estimatedDuration,

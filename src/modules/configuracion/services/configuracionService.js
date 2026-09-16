@@ -49,10 +49,7 @@ const normalizeConfiguration = (
 ) => ({
   ...DEFAULT_CONFIGURATION,
   ...value,
-  taxRate: Number(
-    value.taxRate ??
-      DEFAULT_CONFIGURATION.taxRate,
-  ),
+  taxRate: 16,
   utilityRate: Number(
     value.utilityRate ??
       DEFAULT_CONFIGURATION.utilityRate,

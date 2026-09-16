@@ -110,9 +110,13 @@ self.addEventListener(
   'notificationclick',
   (event) => {
     event.notification.close()
-    const url =
+    const destination =
       event.notification.data?.url ||
       '/agenda'
+    const url = new URL(
+      destination,
+      self.location.origin,
+    ).href
 
     event.waitUntil(
       self.clients.matchAll({
@@ -120,13 +124,20 @@ self.addEventListener(
         includeUncontrolled: true,
       }).then((clients) => {
         const existing =
-          clients.find((client) =>
-            'focus' in client,
+          clients.find(
+            (client) =>
+              client.url.startsWith(
+                self.location.origin,
+              ) &&
+              'focus' in client,
           )
 
         if (existing) {
-          existing.navigate(url)
-          return existing.focus()
+          return existing
+            .navigate(url)
+            .then((client) =>
+              client?.focus(),
+            )
         }
 
         return self.clients.openWindow(url)

@@ -6,6 +6,8 @@ import {
 } from 'react'
 
 import {
+  Bell,
+  BellOff,
   MapPin,
   Pencil,
   Plus,
@@ -486,6 +488,27 @@ function ServiciosPage() {
     }
   }
 
+  const toggleServiceReminder = async (
+    service,
+  ) => {
+    try {
+      await updateService(
+        service.id,
+        {
+          ...service,
+          reminderEnabled:
+            service.reminderEnabled === false,
+        },
+        service.clientId,
+      )
+    } catch (reminderError) {
+      setError(
+        reminderError?.message ||
+          'No fue posible cambiar el aviso.',
+      )
+    }
+  }
+
   const handleLiquidate = async (
     service,
   ) => {
@@ -808,6 +831,60 @@ function ServiciosPage() {
                       styles.cardActions
                     }
                   >
+                    <button
+                      type="button"
+                      onClick={() =>
+                        window.location.assign(
+                          `/listas?type=servicio&id=${encodeURIComponent(
+                            service.id,
+                          )}`,
+                        )
+                      }
+                    >
+                      Lista
+                    </button>
+
+                    {service.scheduledDate &&
+                    ![
+                      'finalizado',
+                      'cancelado',
+                      'archivado',
+                    ].includes(
+                      service.status,
+                    ) ? (
+                      <button
+                        type="button"
+                        className={
+                          service.reminderEnabled ===
+                          false
+                            ? styles.reminderOff
+                            : styles.reminderOn
+                        }
+                        onClick={() =>
+                          toggleServiceReminder(
+                            service,
+                          )
+                        }
+                        title={
+                          service.reminderEnabled ===
+                          false
+                            ? 'Activar avisos'
+                            : 'Desactivar avisos'
+                        }
+                      >
+                        {service.reminderEnabled ===
+                        false ? (
+                          <BellOff size={16} />
+                        ) : (
+                          <Bell size={16} />
+                        )}
+                        {service.reminderEnabled ===
+                        false
+                          ? 'Activar aviso'
+                          : 'Aviso activo'}
+                      </button>
+                    ) : null}
+
                     {service.mapsUrl ? (
                       <button
                         type="button"

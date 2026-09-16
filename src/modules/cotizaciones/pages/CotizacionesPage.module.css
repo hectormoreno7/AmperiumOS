@@ -2,3 +2,4 @@
 .status_aceptada{background:#dff3e5;color:#216c3b}.status_rechazada{background:#f5dddd;color:#842929}.cardActions .serviceButton{border-color:#2e6e48;background:#e8f7ec;color:#205f39}
 .cardActions .liquidateButton{border-color:#2e6e48;background:#2e6e48;color:#fff}
 .viewSwitch{display:flex;gap:4px;padding:4px;border:1px solid #b6bcc3;border-radius:10px;background:#fff}.viewSwitch button{border:0;border-radius:7px;padding:8px 12px;background:transparent;color:#555c64;font-weight:850;cursor:pointer}.viewSwitch .viewActive{background:#202327;color:#fff}
+.cardChargePreview{grid-column:1/-1;display:grid;gap:4px;padding:11px;border:1px solid #d6bc6b;border-radius:9px;background:#fff8df;color:#6f5510;font-size:12px}.cardChargePreview strong{color:#27231a;font-size:14px}

@@ -346,18 +346,10 @@ function BusinessSettings() {
         </header>
         <div className={styles.grid}>
           <label>
-            IVA (%)
+            IVA
             <input
-              type="number"
-              min="0"
-              max="100"
-              value={form.taxRate}
-              onChange={(event) =>
-                update(
-                  'taxRate',
-                  event.target.value,
-                )
-              }
+              value="16% · Tasa fija"
+              readOnly
             />
           </label>
           <label>

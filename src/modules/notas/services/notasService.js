@@ -53,9 +53,7 @@ const normalize = (snapshot) => {
   const taxEnabled = Boolean(
     data.taxEnabled,
   )
-  const taxRate = number(
-    data.taxRate ?? 16,
-  )
+  const taxRate = 16
   const tax = taxEnabled
     ? subtotal * (taxRate / 100)
     : 0
@@ -123,9 +121,7 @@ export const createNote = async (
     taxEnabled: Boolean(
       note.taxEnabled,
     ),
-    taxRate: number(
-      note.taxRate ?? 16,
-    ),
+    taxRate: 16,
     status: 'realizado',
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),

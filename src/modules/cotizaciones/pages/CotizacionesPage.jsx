@@ -121,6 +121,11 @@ const quotationStatusLabel = (status) => {
 const EMPTY_PAYMENT = {
   amount: '',
   method: 'transferencia',
+  cashAmount: '',
+  cardAmount: '',
+  cardCommissionRate: '3.5',
+  installments: '0',
+  deferredRate: '0',
   date: new Date()
     .toISOString()
     .slice(0, 10),
@@ -419,36 +424,34 @@ function CotizacionesPage() {
     ])
 
   const summary = useMemo(
-    () =>
-      quotations.reduce(
+    () => {
+      const now = new Date()
+      const currentMonth = `${now.getFullYear()}-${now.getMonth()}`
+      return quotations.reduce(
         (result, quotation) => ({
-          total:
-            result.total +
-            Number(
-              quotation.totals?.total ||
-                0,
-            ),
+          acceptedThisMonth: result.acceptedThisMonth + (
+            quotation.status === 'aceptada' &&
+            quotation.acceptedAt &&
+            `${new Date(quotation.acceptedAt).getFullYear()}-${new Date(quotation.acceptedAt).getMonth()}` === currentMonth
+              ? Number(quotation.totals?.total || 0)
+              : 0
+          ),
 
           paid:
             result.paid +
-            Number(
-              quotation.paidAmount ||
-                0,
-            ),
+            (quotation.status === 'aceptada' ? Number(quotation.paidAmount || 0) : 0),
 
           pending:
             result.pending +
-            Number(
-              quotation.pendingAmount ||
-                0,
-            ),
+            (quotation.status === 'aceptada' ? Number(quotation.pendingAmount || 0) : 0),
         }),
         {
-          total: 0,
+          acceptedThisMonth: 0,
           paid: 0,
           pending: 0,
         },
-      ),
+      )
+    },
     [quotations],
   )
 
@@ -870,9 +873,22 @@ function CotizacionesPage() {
       return
     }
 
-    const amount = Number(
-      paymentForm.amount,
-    )
+    const cashAmount = Number(paymentForm.cashAmount || 0)
+    const cardAmount = Number(paymentForm.cardAmount || 0)
+    const isMixed = paymentForm.method === 'mixto'
+    const baseAmount = isMixed
+      ? cashAmount + cardAmount
+      : Number(paymentForm.amount)
+    const effectiveCardAmount = isMixed
+      ? cardAmount
+      : paymentForm.method === 'tarjeta'
+        ? baseAmount
+        : 0
+    const commissionRate = effectiveCardAmount > 0
+      ? Number(paymentForm.cardCommissionRate || 0) + Number(paymentForm.deferredRate || 0)
+      : 0
+    const commissionAmount = effectiveCardAmount * commissionRate / 100
+    const amount = baseAmount
 
     if (
       !Number.isFinite(amount) ||
@@ -911,6 +927,12 @@ function CotizacionesPage() {
           method: paymentForm.method,
           date: paymentForm.date,
           note: paymentForm.note,
+          cashAmount: isMixed ? cashAmount : paymentForm.method === 'efectivo' ? amount : 0,
+          cardAmount: effectiveCardAmount,
+          cardCommissionRate: commissionRate,
+          cardCommissionAmount: commissionAmount,
+          chargedAmount: amount + commissionAmount,
+          installments: Number(paymentForm.installments || 0),
         },
       )
 
@@ -1010,10 +1032,10 @@ function CotizacionesPage() {
     <main className={styles.page}>
       <section className={styles.summaryGrid}>
         <article>
-          <span>Total cotizado</span>
+          <span>Aceptado este mes</span>
 
           <strong>
-            {money(summary.total)}
+            {money(summary.acceptedThisMonth)}
           </strong>
         </article>
 
@@ -1358,6 +1380,19 @@ function CotizacionesPage() {
                         styles.cardActions
                       }
                     >
+                      <button
+                        type="button"
+                        onClick={() =>
+                          window.location.assign(
+                            `/listas?type=cotizacion&id=${encodeURIComponent(
+                              quotation.id,
+                            )}`,
+                          )
+                        }
+                      >
+                        Lista
+                      </button>
+
                       {quotation.status ===
                         'borrador' ||
                       quotation.status ===
@@ -1437,7 +1472,7 @@ function CotizacionesPage() {
                             )
                           }
                         >
-                          Abonos
+                          Cobrar / abonos
                         </button>
                       ) : null}
 
@@ -1663,6 +1698,10 @@ function CotizacionesPage() {
                       Tarjeta
                     </option>
 
+                    <option value="mixto">
+                      Mixto: efectivo y tarjeta
+                    </option>
+
                     <option value="deposito">
                       Depósito
                     </option>
@@ -1672,6 +1711,79 @@ function CotizacionesPage() {
                     </option>
                   </select>
                 </label>
+
+                {paymentForm.method === 'mixto' ? (
+                  <>
+                    <label>
+                      Parte en efectivo
+
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={paymentForm.cashAmount}
+                        onChange={(event) => setPaymentForm((current) => ({ ...current, cashAmount: event.target.value }))}
+                      />
+                    </label>
+
+                    <label>
+                      Parte con tarjeta
+
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={paymentForm.cardAmount}
+                        onChange={(event) => setPaymentForm((current) => ({ ...current, cardAmount: event.target.value }))}
+                      />
+                    </label>
+                  </>
+                ) : null}
+
+                {(paymentForm.method === 'tarjeta' || paymentForm.method === 'mixto') ? (
+                  <>
+                    <label>
+                      Comisión tarjeta
+
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={paymentForm.cardCommissionRate}
+                        onChange={(event) => setPaymentForm((current) => ({ ...current, cardCommissionRate: event.target.value }))}
+                      />
+                    </label>
+
+                    <label>
+                      Meses a diferir (opcional)
+
+                      <input
+                        type="number"
+                        min="0"
+                        step="1"
+                        value={paymentForm.installments}
+                        onChange={(event) => setPaymentForm((current) => ({ ...current, installments: event.target.value }))}
+                      />
+                    </label>
+
+                    <label>
+                      % adicional del banco
+
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={paymentForm.deferredRate}
+                        onChange={(event) => setPaymentForm((current) => ({ ...current, deferredRate: event.target.value }))}
+                      />
+                    </label>
+
+                    <div className={styles.cardChargePreview}>
+                      Comisión: {money((paymentForm.method === 'mixto' ? Number(paymentForm.cardAmount || 0) : Number(paymentForm.amount || 0)) * (Number(paymentForm.cardCommissionRate || 0) + Number(paymentForm.deferredRate || 0)) / 100)}
+                      <strong>Cobro al cliente: {money((paymentForm.method === 'mixto' ? Number(paymentForm.cashAmount || 0) + Number(paymentForm.cardAmount || 0) : Number(paymentForm.amount || 0)) + ((paymentForm.method === 'mixto' ? Number(paymentForm.cardAmount || 0) : Number(paymentForm.amount || 0)) * (Number(paymentForm.cardCommissionRate || 0) + Number(paymentForm.deferredRate || 0)) / 100))}</strong>
+                    </div>
+                  </>
+                ) : null}
 
                 <label>
                   Fecha
@@ -1810,6 +1922,12 @@ function CotizacionesPage() {
                             {
                               payment.note
                             }
+                          </p>
+                        ) : null}
+
+                        {Number(payment.cardCommissionAmount || 0) > 0 ? (
+                          <p>
+                            Tarjeta: {money(payment.cardAmount)} · Comisión {money(payment.cardCommissionAmount)} · Cobrado {money(payment.chargedAmount)}{Number(payment.installments || 0) > 0 ? ` · ${payment.installments} meses` : ''}
                           </p>
                         ) : null}
                       </div>

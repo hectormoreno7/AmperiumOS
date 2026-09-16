@@ -14,6 +14,7 @@ import HistorialPage from '../modules/historial/pages/HistorialPage'
 import AgendaPage from '../modules/agenda/pages/AgendaPage'
 import ConfiguracionPage from '../modules/configuracion/pages/ConfiguracionPage'
 import NotasPage from '../modules/notas/pages/NotasPage'
+import ListasPage from '../modules/listas/pages/ListasPage'
 
 import ModulePlaceholderPage from '../shared/pages/ModulePlaceholderPage'
 
@@ -61,6 +62,11 @@ function AppRoutes() {
         <Route
           path="/notas"
           element={<NotasPage />}
+        />
+
+        <Route
+          path="/listas"
+          element={<ListasPage />}
         />
 
         <Route

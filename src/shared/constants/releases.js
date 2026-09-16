@@ -1,5 +1,33 @@
 const releases = [
   {
+    version: '1.1.0',
+    date: '25 de julio de 2026',
+    title: 'Listas prácticas',
+    summary:
+      'Se incorporan checklists generales y vinculados al trabajo.',
+    changes: [
+      'Nuevo módulo de Listas con casillas para marcar pendientes.',
+      'Listas generales sin configuración obligatoria.',
+      'Vinculación opcional con cotizaciones o servicios.',
+      'Acceso Lista desde cada cotización y servicio.',
+      'Notas comerciales renombradas como Servicio express.',
+      'Corrección del detalle de notificaciones en iPhone.',
+    ],
+  },
+  {
+    version: '1.0.1',
+    date: '25 de julio de 2026',
+    title: 'Avisos y tasa de IVA',
+    summary:
+      'Se mejora la apertura de avisos y el control de recordatorios de servicios.',
+    changes: [
+      'Las notificaciones abren directamente su sección en la aplicación.',
+      'IVA fijo del 16%, sin posibilidad de modificación.',
+      'Avisos automáticos para servicios programados.',
+      'Control para activar o desactivar el aviso desde cada servicio.',
+    ],
+  },
+  {
     version: '1.0.0',
     date: '25 de julio de 2026',
     title: 'Primera versión estable',

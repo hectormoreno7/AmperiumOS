@@ -116,10 +116,7 @@ function NotasPage() {
       items: EMPTY.items.map((item) => ({
         ...item,
       })),
-      taxRate: Number(
-        companyConfiguration.taxRate ??
-          EMPTY.taxRate,
-      ),
+      taxRate: 16,
     })
     setError('')
     setOpen(true)
@@ -167,10 +164,7 @@ function NotasPage() {
       })
       setForm({
         ...EMPTY,
-        taxRate: Number(
-          companyConfiguration.taxRate ??
-            EMPTY.taxRate,
-        ),
+        taxRate: 16,
       })
       setOpen(false)
       setError('')

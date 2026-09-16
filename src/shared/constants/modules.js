@@ -33,10 +33,18 @@ const modules = [
   },
   {
     id: 'notas',
-    label: 'Notas',
+    label: 'Servicio express',
     path: '/notas',
     icon: '▧',
-    description: 'Notas de venta, pagos y saldos.',
+    description: 'Trabajos rápidos, cobros y recibos.',
+    enabled: true,
+  },
+  {
+    id: 'listas',
+    label: 'Listas',
+    path: '/listas',
+    icon: '✓',
+    description: 'Pendientes generales o vinculados.',
     enabled: true,
   },
   {

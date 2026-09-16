@@ -8,24 +8,47 @@ import {
 import styles from "./ClientSummary.module.css";
 
 export default function ClientSummary({ quotations = [] }) {
+    const isAccepted = (quotation) =>
+        String(quotation?.status || "")
+            .trim()
+            .toLowerCase() === "aceptada";
 
-    const totalQuoted = quotations.reduce(
-        (sum, q) => sum + Number(q.totals?.total || 0),
-        0
-    );
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth();
+    const currentYear = currentDate.getFullYear();
 
     const totalAccepted = quotations
-        .filter((q) => q.status === "Aceptada")
+        .filter(isAccepted)
         .reduce(
             (sum, q) => sum + Number(q.totals?.total || 0),
+            0
+        );
+
+    const acceptedThisMonth = quotations
+        .filter((quotation) => {
+            if (!isAccepted(quotation) || !quotation.acceptedAt) {
+                return false;
+            }
+
+            const acceptedAt = new Date(quotation.acceptedAt);
+
+            return (
+                !Number.isNaN(acceptedAt.getTime()) &&
+                acceptedAt.getMonth() === currentMonth &&
+                acceptedAt.getFullYear() === currentYear
+            );
+        })
+        .reduce(
+            (sum, quotation) =>
+                sum + Number(quotation.totals?.total || 0),
             0
         );
 
     const pending = quotations
         .filter(
             (q) =>
-                q.status !== "Aceptada" &&
-                q.status !== "Cancelada"
+                !isAccepted(q) &&
+                String(q.status || "").trim().toLowerCase() !== "cancelada"
         )
         .reduce(
             (sum, q) => sum + Number(q.totals?.total || 0),
@@ -44,8 +67,8 @@ export default function ClientSummary({ quotations = [] }) {
     const cards = [
         {
             icon: <DollarSign size={20} />,
-            title: "Cotizado",
-            value: `$${totalQuoted.toLocaleString("es-MX")}`,
+            title: "Aceptado este mes",
+            value: `$${acceptedThisMonth.toLocaleString("es-MX")}`,
         },
         {
             icon: <CheckCircle2 size={20} />,

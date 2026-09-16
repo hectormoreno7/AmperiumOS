@@ -420,6 +420,7 @@ const collectDueReminders = (
     .filter(
       (item) =>
         item.scheduledDate &&
+        item.reminderEnabled !== false &&
         item.archived !== true &&
         ![
           'finalizado',
